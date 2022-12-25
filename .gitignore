@@ -1,0 +1,5 @@
+*-backup
+tags
+*.*~
+*.s
+*.swp

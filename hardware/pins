@@ -1,0 +1,28 @@
+
+
+
+tp      IO pin  direction   description
+
+PD7     E00     OUT         relay L_FAN
+PD4     E01     OUT         relay M_FAN
+PD3     E02     OUT         relay H_FAN
+PD2     E03     OUT         relay ION
+PB4     E04     IN          cap touch DEC
+PB5     E05     IN          cap touch INC
+PB6     E06     IN          cap touch CLEAR
+PD1     E07     OUT         cap touch enable
+PD0     E10     OUT         led red ring
+PC7     E11     OUT         led filter text
+PC6     E12     OUT         led motor l1
+PC5     E13     OUT         led motor l2
+PC4     E14     OUT         led motor l3
+PC3     DNC     OUT         led pm/gas text
+PE5     DNC     OUT         led auto text
+PC2     DNC     OUT         led pm l1
+PB1     DNC     OUT         led pm l2
+PB3     DNC     OUT         led pm l3
+PC1     E15     OUT         led gas l1
+PA2     E16     OUT         led gas l2
+PB2     E17     OUT         led gas l3
+PA1     DNC     OUT         led ext pcb
+
