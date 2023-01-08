@@ -6,10 +6,14 @@
 #include "proj.h"
 #include "driverlib.h"
 #include "glue.h"
+#include "intertechno.h"
+#include "hal_pmm.h"
+#include "rf1a.h"
 #include "ui.h"
 #include "sig.h"
 
 uart_descriptor bc; // backchannel uart interface
+volatile uint8_t cc1101_last_event = 0;
 
 static void uart_bcl_rx_irq(uint32_t msg)
 {
@@ -26,6 +30,11 @@ void check_events(void)
         msg |= SYS_MSG_UART_BCL_RX;
         uart_rst_event(&bc);
     }
+    // transceiver
+    if (cc1101_last_event & SYS_MSG_CC_TX) {
+        msg |= SYS_MSG_CC_TX;
+        cc1101_last_event = 0;
+    }
 
     eh_exec(msg);
 }
@@ -39,35 +48,24 @@ int main(void)
     sig0_on;
 #endif
 
+    SetVCore(2);
+    ResetRadioCore();
+    InitRadio();
+
     clock_pin_init();
     clock_init();
 
-#if defined (__MSP430FR2433__) || defined (__MSP430FR2476__) || defined (__MSP430FR4133__) || defined (__MSP430FR5969__) || defined (__MSP430FR5994__)
-    bc.baseAddress = EUSCI_A0_BASE;
-#elif defined (__MSP430FR2355__) || defined (__MSP430F5529__)
-    bc.baseAddress = EUSCI_A1_BASE;
-#elif defined (__CC430F5137__)
     bc.baseAddress = USCI_A0_BASE;
-#elif defined (__MSP430F5510__) || defined (__MSP430F5529__)
-    bc.baseAddress = USCI_A1_BASE;
-#endif
     bc.baudrate = BAUDRATE_57600;
-
-#if defined __MSP430FR6989__
-    P3SEL0 |= BIT4 | BIT5;
-    P3SEL1 &= ~(BIT4 | BIT5);
-#elif defined __MSP430FR2476__
-    P1SEL0 |= BIT4 | BIT5;
-    P1SEL1 &= ~(BIT4 | BIT5); 
-#else
     uart_pin_init(&bc);
-#endif
     uart_init(&bc);
 #if defined UART_RX_USES_RINGBUF
     uart_set_rx_irq_handler(&bc, uart_rx_ringbuf_handler);
 #else
     uart_set_rx_irq_handler(&bc, uart_rx_simple_handler);
 #endif
+
+    it_handler_init();
 
 #ifdef USE_SIG
     sig0_off;
@@ -102,5 +100,41 @@ int main(void)
         check_events();
     }
 
+}
+
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector=PORT5_VECTOR
+__interrupt void cc1101_isr_handler(void)
+#elif defined(__GNUC__)
+void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
+#else
+#error Compiler not supported!
+#endif
+{
+  switch(__even_in_range(RF1AIV,32))        // Prioritizing Radio Core Interrupt 
+  {
+    case  0: break;                         // No RF core interrupt pending                                            
+    case  2: break;                         // RFIFG0 
+    case  4: break;                         // RFIFG1
+    case  6: break;                         // RFIFG2
+    case  8: break;                         // RFIFG3
+    case 10: break;                         // RFIFG4
+    case 12: break;                         // RFIFG5
+    case 14: break;                         // RFIFG6          
+    case 16: break;                         // RFIFG7
+    case 18: break;                         // RFIFG8
+    case 20:                                // RFIFG9
+        cc1101_last_event |= SYS_MSG_CC_TX;
+        RF1AIE &= ~BIT9;                    // Disable TX end-of-packet interrupt
+        sig0_off;
+      break;
+    case 22: break;                         // RFIFG10
+    case 24: break;                         // RFIFG11
+    case 26: break;                         // RFIFG12
+    case 28: break;                         // RFIFG13
+    case 30: break;                         // RFIFG14
+    case 32: break;                         // RFIFG15
+  }  
+  __bic_SR_register_on_exit(LPM3_bits);     
 }
 
