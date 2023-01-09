@@ -17,7 +17,6 @@
 #include <msp430.h>
 #include "rf1a.h"
 
-
 // *************************************************************************************************
 // Global section
 
@@ -25,8 +24,6 @@
 // *************************************************************************************************
 // Define section
 #define st(x)      			do { x } while (__LINE__ == -1)
-//#define ENTER_CRITICAL_SECTION(x)  	st( x = __read_status_register(); __dint(); )
-//#define EXIT_CRITICAL_SECTION(x)	__write_status_register(x)
 #define ENTER_CRITICAL_SECTION(x)  	st( x = __get_SR_register(); __dint(); )
 #define EXIT_CRITICAL_SECTION(x)	__bis_SR_register(x)
 
@@ -285,7 +282,6 @@ void InitRadio(void)
   PMMCTL0_H = 0x00; 
   
   //WriteRfSettings(&rfSettings);
-  
   //WriteSinglePATable(PATABLE_VAL);
 }
 

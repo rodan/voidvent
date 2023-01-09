@@ -31,20 +31,18 @@
 * \{
 **/
 
-#ifndef __INTERTECHNO_H__
-#define __INTERTECHNO_H__
+#ifndef __RADIO_H__
+#define __RADIO_H__
 
-#define INTERTECHNO_CMD_ON  0x07        // command for turning switches on
-#define INTERTECHNO_CMD_OFF 0x06        // command for turning switches off
-#define INTERTECHNO_CMD_SP  0x0f        // special devices like doorbells, PIR detectors use this cmd
-#define INTERTECHNO_SEQ_SIZE  16        // sequence buffer size to be allocated
+#define RADIO_TX_IRQ 0x1
+#define RADIO_RX_IRQ 0x2
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void it_handler_init(void);
-void it_tx_cmd(const uint8_t prefix, const uint8_t cmd);
+uint8_t radio_get_event(void);
+void radio_rst_event(void);
 
 #ifdef __cplusplus
 }

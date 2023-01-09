@@ -9,11 +9,11 @@
 #include "intertechno.h"
 #include "hal_pmm.h"
 #include "rf1a.h"
+#include "radio.h"
 #include "ui.h"
 #include "sig.h"
 
 uart_descriptor bc; // backchannel uart interface
-volatile uint8_t cc1101_last_event = 0;
 
 static void uart_bcl_rx_irq(uint32_t msg)
 {
@@ -31,9 +31,12 @@ void check_events(void)
         uart_rst_event(&bc);
     }
     // transceiver
-    if (cc1101_last_event & SYS_MSG_CC_TX) {
+    if (radio_get_event() & RADIO_TX_IRQ) {
         msg |= SYS_MSG_CC_TX;
-        cc1101_last_event = 0;
+        radio_rst_event();
+    } else if (radio_get_event() & RADIO_RX_IRQ) {
+        msg |= SYS_MSG_CC_RX;
+        radio_rst_event();
     }
 
     eh_exec(msg);
@@ -48,7 +51,7 @@ int main(void)
     sig0_on;
 #endif
 
-    SetVCore(2);
+    PMM_setVCore(2);
     ResetRadioCore();
     InitRadio();
 
@@ -102,39 +105,4 @@ int main(void)
 
 }
 
-#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-#pragma vector=PORT5_VECTOR
-__interrupt void cc1101_isr_handler(void)
-#elif defined(__GNUC__)
-void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
-#else
-#error Compiler not supported!
-#endif
-{
-  switch(__even_in_range(RF1AIV,32))        // Prioritizing Radio Core Interrupt 
-  {
-    case  0: break;                         // No RF core interrupt pending                                            
-    case  2: break;                         // RFIFG0 
-    case  4: break;                         // RFIFG1
-    case  6: break;                         // RFIFG2
-    case  8: break;                         // RFIFG3
-    case 10: break;                         // RFIFG4
-    case 12: break;                         // RFIFG5
-    case 14: break;                         // RFIFG6          
-    case 16: break;                         // RFIFG7
-    case 18: break;                         // RFIFG8
-    case 20:                                // RFIFG9
-        cc1101_last_event |= SYS_MSG_CC_TX;
-        RF1AIE &= ~BIT9;                    // Disable TX end-of-packet interrupt
-        sig0_off;
-      break;
-    case 22: break;                         // RFIFG10
-    case 24: break;                         // RFIFG11
-    case 26: break;                         // RFIFG12
-    case 28: break;                         // RFIFG13
-    case 30: break;                         // RFIFG14
-    case 32: break;                         // RFIFG15
-  }  
-  __bic_SR_register_on_exit(LPM3_bits);     
-}
 
