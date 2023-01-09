@@ -7,7 +7,6 @@
 #include "driverlib.h"
 #include "glue.h"
 #include "intertechno.h"
-#include "hal_pmm.h"
 #include "rf1a.h"
 #include "radio.h"
 #include "ui.h"
