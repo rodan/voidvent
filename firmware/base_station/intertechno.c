@@ -1,39 +1,3 @@
-//
-// code used to control Intertechno radio switches
-//
-// Author:          Petre Rodan <2b4eda@subdimension.ro>
-// Available from:  https://github.com/rodan/openchronos-rfsw
-// License:         GNU GPLv3
-//
-// Based on a nice tutorial by Christian M. Schmid
-// http://blog.chschmid.com/?page_id=193
-//
-// Usage:
-//
-// Line1 contains FF.DD
-//
-// FF is the decimal notation of the family in which the device is placed [1-16]
-//                  A is 01, B is 02 ... P is 16.
-//                  this option must be used for doorbell/PIR device selection
-// DD is the decimal notation of the device number [1-16]
-//                  on some factory remotes devices are placed in 4 groups,
-//                  in this case device 2 from group 3 is device number 10.
-//                  special devices like doorbell/PIRs must be set as device number 8.
-//
-// Line2 becomes 'on', 'off', 'spe' depending on what command was sent last
-//
-// if compile time option CONFIG_MOD_INTERTECHNO_PW is set then the output power is 
-// selectable on Line2.
-//
-// radio glyphs come up when the command is sent.
-//
-// buttons:
-//
-// up      - send an 'on' command to the current device
-// down    - send an 'off' command
-// #       - send a special command (for doorbells/PIRs), make sure DD is 8 in this case.
-// long *  - enter config mode. use up, down, # to select family and device, * to save.
-//
 
 #include <inttypes.h>
 #include <msp430.h>
@@ -42,78 +6,16 @@
 #include "rf1a.h"
 #include "intertechno.h"
 
-// starting values
-//#define INTERTECHNO_DEF_FAMILY 12       // this translates as family 'L' on the rotary switch
-//#define INTERTECHNO_DEF_DEVICE 5        // device number 7 on remotes that have devices numbered 1 to 16
-                                        // or device 3 group 2 on others
-
 // PATable[1] power level (based on SmartRF Studio)
-#ifdef CONFIG_MOD_INTERTECHNO_PW
-uint8_t it_pwr[4] = { 0x26, 0x2d, 0x50, 0xc6 };
-uint8_t it_pwr_level = 2;
-uint8_t it_tmp_pwr_level = 2;
-#else
 //#define INTERTECHNO_RF_POWER   0x26     // -12 dBm   ~13mA peak
 //#define INTERTECHNO_RF_POWER   0x2d     //  -6 dBm
 //#define INTERTECHNO_RF_POWER   0x50     //   0 dBm
 #define INTERTECHNO_RF_POWER   0xc6     //  10 dBm   ~18mA peak
-#endif
 
 uint8_t rotate_byte(uint8_t in);
 void it_rf_init(void);
 static void it_tx_handler(uint32_t msg);
 static void it_rx_handler(uint32_t msg);
-
-#if 0
-uint8_t it_family = INTERTECHNO_DEF_FAMILY;
-uint8_t it_device = INTERTECHNO_DEF_DEVICE;
-uint8_t it_tmp_family = INTERTECHNO_DEF_FAMILY;
-uint8_t it_tmp_device = INTERTECHNO_DEF_DEVICE;
-
-static void intertechno_activated()
-{
-    sys_messagebus_register(&it_tx_end, SYS_MSG_RADIO);
-//    _printf(0, LCD_SEG_L1_3_2, "%02u", it_family);
-//    _printf(0, LCD_SEG_L1_1_0, "%02u", it_device);
-//#ifdef CONFIG_MOD_INTERTECHNO_PW
-//    _printf(0, LCD_SEG_L2_1_0, "%02x", it_pwr[it_pwr_level]);
-//#endif
-//    display_symbol(0, LCD_SEG_L1_DP1, SEG_ON);
-}
-
-static void intertechno_deactivated()
-{
-    sys_messagebus_unregister(&it_tx_end);
-//    display_clear(0, 1);
-}
-
-static void intertechno_up_pressed()
-{
-    it_tx_cmd(((it_family - 1) << 4) + it_device - 1, INTERTECHNO_CMD_ON);
-//    display_chars(0, LCD_SEG_L2_2_0, "ON ", SEG_SET);
-}
-
-static void intertechno_down_pressed()
-{
-    it_tx_cmd(((it_family - 1) << 4) + it_device - 1, INTERTECHNO_CMD_OFF);
-//    display_chars(0, LCD_SEG_L2_2_0, "OFF", SEG_SET);
-}
-
-static void intertechno_num_pressed()
-{
-    it_tx_cmd(((it_family - 1) << 4) + it_device - 1, INTERTECHNO_CMD_SP);
-//    display_chars(0, LCD_SEG_L2_2_0, "SPE", SEG_SET);
-}
-
-static void intertechno_save(void)
-{
-    it_family = it_tmp_family;
-    it_device = it_tmp_device;
-#ifdef CONFIG_MOD_INTERTECHNO_PW
-    it_pwr_level = it_tmp_pwr_level;
-#endif
-}
-#endif
 
 void it_handler_init(void)
 {
@@ -141,14 +43,14 @@ void it_rf_init(void)
     WriteSingleReg(FREQ0, 0x71);        //Frequency Control Word, Low Byte
     WriteSingleReg(MDMCFG4, 0x86);      //Modem Configuration
     WriteSingleReg(MDMCFG3, 0x70);      //Modem Configuration
-    WriteSingleReg(MDMCFG2, 0x30);      //Modem Configuration
+    WriteSingleReg(MDMCFG2, 0x30);      //Modem Configuration   0x32 sync mode!!
     WriteSingleReg(MDMCFG1, 0x02);      //Modem Configuration
     WriteSingleReg(MCSM1, 0x00);        //Main Radio Control State Machine Configuration
     WriteSingleReg(MCSM0, 0x00);        //Main Radio Control State Machine Configuration
     WriteSingleReg(FOCCFG, 0x76);       //Frequency Offset Compensation Configuration
     WriteSingleReg(WOREVT1, 0x87);      //High Byte Event0 Timeout
     WriteSingleReg(WOREVT0, 0x6B);      //Low Byte Event0 Timeout
-    WriteSingleReg(WORCTRL, 0xF8);      //Wake On Radio Control
+    WriteSingleReg(WORCTRL, 0xF8);      //Wake On Radio Control  sets a reserved bit ?!
     WriteSingleReg(FREND0, 0x11);       //Front End TX Configuration
     WriteSingleReg(TEST0, 0x09);        //Various Test Settings
 
@@ -203,11 +105,6 @@ void it_tx_cmd(const uint8_t prefix, const uint8_t cmd)
     it_buff[p++] = 0;
     it_buff[p] = 0;
 
-    // display RF symbol
-//    display_symbol(0, LCD_ICON_BEEPER1, SEG_ON);
-//    display_symbol(0, LCD_ICON_BEEPER2, SEG_ON);
-//    display_symbol(0, LCD_ICON_BEEPER3, SEG_ON);
-
     it_rf_init();
 
     Strobe(RF_SCAL);            // re-calibrate radio
@@ -230,16 +127,10 @@ static void it_tx_handler(uint32_t msg)
     Strobe(RF_SIDLE);           // IDLE
     Strobe(RF_SFTX);            // flush TXFIFO
     Strobe(RF_SPWD);            // power-down mode
-
-    // clear RF symbol
-//    display_symbol(0, LCD_ICON_BEEPER1, SEG_OFF);
-//    display_symbol(0, LCD_ICON_BEEPER2, SEG_OFF);
-//    display_symbol(0, LCD_ICON_BEEPER3, SEG_OFF);
 }
 
 static void it_rx_handler(uint32_t msg)
 {
 
 }
-
 
