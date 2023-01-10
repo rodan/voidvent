@@ -17,6 +17,8 @@ void it_rf_init(void);
 static void it_tx_handler(uint32_t msg);
 static void it_rx_handler(uint32_t msg);
 
+extern const RF_SETTINGS rfSettings_fixed;
+
 void it_handler_init(void)
 {
     eh_register(&it_tx_handler, SYS_MSG_CC_TX);
@@ -26,34 +28,10 @@ void it_handler_init(void)
 void it_rf_init(void)
 {
     // logic 0 and logic 1 power levels for OOK modulation
-#ifdef CONFIG_MOD_INTERTECHNO_PW
-    uint8_t PATable[2] = { 0x00, it_pwr[it_pwr_level] };
-#else
     uint8_t PATable[2] = { 0x00, INTERTECHNO_RF_POWER };
-#endif
 
     ResetRadioCore();
-
-    // minimal register changes
-    WriteSingleReg(IOCFG0, 0x06);       //GDO0 Output Configuration
-    WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE*4);       //Packet Length
-    WriteSingleReg(PKTCTRL0, 0x00);     //Packet Automation Control
-    WriteSingleReg(FREQ2, 0x10);        //Frequency Control Word, High Byte
-    WriteSingleReg(FREQ1, 0xB0);        //Frequency Control Word, Middle Byte
-    WriteSingleReg(FREQ0, 0x71);        //Frequency Control Word, Low Byte
-    WriteSingleReg(MDMCFG4, 0x86);      //Modem Configuration
-    WriteSingleReg(MDMCFG3, 0x70);      //Modem Configuration
-    WriteSingleReg(MDMCFG2, 0x30);      //Modem Configuration   0x32 sync mode!!
-    WriteSingleReg(MDMCFG1, 0x02);      //Modem Configuration
-    WriteSingleReg(MCSM1, 0x00);        //Main Radio Control State Machine Configuration
-    WriteSingleReg(MCSM0, 0x00);        //Main Radio Control State Machine Configuration
-    WriteSingleReg(FOCCFG, 0x76);       //Frequency Offset Compensation Configuration
-    WriteSingleReg(WOREVT1, 0x87);      //High Byte Event0 Timeout
-    WriteSingleReg(WOREVT0, 0x6B);      //Low Byte Event0 Timeout
-    WriteSingleReg(WORCTRL, 0xF8);      //Wake On Radio Control  sets a reserved bit ?!
-    WriteSingleReg(FREND0, 0x11);       //Front End TX Configuration
-    WriteSingleReg(TEST0, 0x09);        //Various Test Settings
-
+    WriteRfSettings(&rfSettings_fixed);
     WriteBurstPATable(&PATable[0], 2);
 }
 

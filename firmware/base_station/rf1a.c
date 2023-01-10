@@ -94,6 +94,39 @@ void ResetRadioCore(void)
 	Strobe(RF_SNOP);                             // Reset Radio Pointer
 }
 
+// *****************************************************************************
+// @fn          WriteRfSettings
+// @brief       Write the minimum set of RF configuration register settings
+// @param       RF_SETTINGS *pRfSettings  Pointer to the structure that holds the rf settings
+// @return      none
+// *****************************************************************************
+void WriteRfSettings(const RF_SETTINGS *pRfSettings) {
+    WriteSingleReg(IOCFG2,   pRfSettings->iocfg2);
+    WriteSingleReg(IOCFG1,   pRfSettings->iocfg1);
+    WriteSingleReg(IOCFG0,   pRfSettings->iocfg0);
+    WriteSingleReg(PKTLEN,   pRfSettings->pktlen);
+    WriteSingleReg(PKTCTRL0, pRfSettings->pktctrl0);
+    WriteSingleReg(FREQ2,    pRfSettings->freq2);
+    WriteSingleReg(FREQ1,    pRfSettings->freq1);
+    WriteSingleReg(FREQ0,    pRfSettings->freq0);
+    WriteSingleReg(MDMCFG4,  pRfSettings->mdmcfg4);
+    WriteSingleReg(MDMCFG3,  pRfSettings->mdmcfg3);
+    WriteSingleReg(MDMCFG2,  pRfSettings->mdmcfg2);
+    WriteSingleReg(MDMCFG1,  pRfSettings->mdmcfg1);
+    WriteSingleReg(MCSM1 ,   pRfSettings->mcsm1);
+    WriteSingleReg(MCSM0 ,   pRfSettings->mcsm0);
+    WriteSingleReg(FOCCFG,   pRfSettings->foccfg);
+    WriteSingleReg(WOREVT1,  pRfSettings->worevt1);
+    WriteSingleReg(WOREVT0,  pRfSettings->worevt0);
+    WriteSingleReg(WORCTRL,  pRfSettings->worctrl);
+    WriteSingleReg(FREND0,   pRfSettings->frend0);
+    WriteSingleReg(FSCAL3,   pRfSettings->fscal3);
+    WriteSingleReg(FSCAL2,   pRfSettings->fscal2);
+    WriteSingleReg(FSCAL1,   pRfSettings->fscal1);
+    WriteSingleReg(FSCAL0,   pRfSettings->fscal0);
+    WriteSingleReg(TEST0,    pRfSettings->test0);
+}
+
 // *************************************************************************************************
 // @fn          ReadSingleReg
 // @brief       Read byte from register.
