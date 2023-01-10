@@ -38,6 +38,7 @@
 #define INTERTECHNO_CMD_OFF 0x06        // command for turning switches off
 #define INTERTECHNO_CMD_SP  0x0f        // special devices like doorbells, PIR detectors use this cmd
 #define INTERTECHNO_SEQ_SIZE  16        // sequence buffer size to be allocated
+#define INTERTECHNO_SEQ_REPEAT  4       // how many times will the sequence be repeated
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +46,7 @@ extern "C" {
 
 void it_handler_init(void);
 void it_tx_cmd(const uint8_t prefix, const uint8_t cmd);
+void it_rx_on(void);
 
 #ifdef __cplusplus
 }

@@ -104,7 +104,6 @@ void WriteRfSettings(const RF_SETTINGS *pRfSettings) {
     WriteSingleReg(IOCFG2,   pRfSettings->iocfg2);
     WriteSingleReg(IOCFG1,   pRfSettings->iocfg1);
     WriteSingleReg(IOCFG0,   pRfSettings->iocfg0);
-    WriteSingleReg(PKTLEN,   pRfSettings->pktlen);
     WriteSingleReg(PKTCTRL0, pRfSettings->pktctrl0);
     WriteSingleReg(FREQ2,    pRfSettings->freq2);
     WriteSingleReg(FREQ1,    pRfSettings->freq1);

@@ -51,9 +51,6 @@ int main(void)
 #endif
 
     PMM_setVCore(2);
-    ResetRadioCore();
-    InitRadio();
-
     clock_pin_init();
     clock_init();
 
@@ -67,7 +64,12 @@ int main(void)
     uart_set_rx_irq_handler(&bc, uart_rx_simple_handler);
 #endif
 
+    ResetRadioCore();
+    InitRadio();
+
     it_handler_init();
+    it_rx_on();
+    radio_rx_on();
 
 #ifdef USE_SIG
     sig0_off;

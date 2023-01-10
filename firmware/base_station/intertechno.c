@@ -4,16 +4,19 @@
 #include "glue.h"
 #include "proj.h"
 #include "rf1a.h"
+#include "radio.h"
 #include "intertechno.h"
 
+// set logic 0 and logic 1 power levels for OOK modulation
 // PATable[1] power level (based on SmartRF Studio)
 //#define INTERTECHNO_RF_POWER   0x26     // -12 dBm   ~13mA peak
 //#define INTERTECHNO_RF_POWER   0x2d     //  -6 dBm
-//#define INTERTECHNO_RF_POWER   0x50     //   0 dBm
-#define INTERTECHNO_RF_POWER   0xc6     //  10 dBm   ~18mA peak
+#define INTERTECHNO_RF_POWER   0x50     //   0 dBm
+//#define INTERTECHNO_RF_POWER   0xc6     //  10 dBm   ~18mA peak
+uint8_t PATable[2] = { 0x00, INTERTECHNO_RF_POWER };
 
-uint8_t rotate_byte(uint8_t in);
-void it_rf_init(void);
+static uint8_t rotate_byte(uint8_t in);
+static void it_rf_init(void);
 static void it_tx_handler(uint32_t msg);
 static void it_rx_handler(uint32_t msg);
 
@@ -25,17 +28,14 @@ void it_handler_init(void)
     eh_register(&it_rx_handler, SYS_MSG_CC_RX);
 }
 
-void it_rf_init(void)
+static void it_rf_init(void)
 {
-    // logic 0 and logic 1 power levels for OOK modulation
-    uint8_t PATable[2] = { 0x00, INTERTECHNO_RF_POWER };
-
     ResetRadioCore();
     WriteRfSettings(&rfSettings_fixed);
     WriteBurstPATable(&PATable[0], 2);
 }
 
-uint8_t rotate_byte(uint8_t in)
+static uint8_t rotate_byte(uint8_t in)
 {
     uint8_t rv = 0;
     rv += (in & 0x10) << 3;
@@ -47,6 +47,17 @@ uint8_t rotate_byte(uint8_t in)
     rv += (in & 0x4) >> 1;
     rv += (in & 0x8) >> 3;
     return rv;
+}
+
+void it_rx_on(void)
+{
+    it_rf_init();
+    WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE);
+    //WriteSingleReg(SYNC0, (rotate_byte(INTERTECHNO_FAMILY) & 0xf0) >> 2);
+    //WriteSingleReg(SYNC1, rotate_byte(INTERTECHNO_FAMILY) & 0x0f);
+    WriteSingleReg(SYNC0, 0x8e);
+    WriteSingleReg(SYNC1, 0x8e);
+    //radio_set_state(RADIO_STATE_RX);
 }
 
 void it_tx_cmd(const uint8_t prefix, const uint8_t cmd)
@@ -83,8 +94,12 @@ void it_tx_cmd(const uint8_t prefix, const uint8_t cmd)
     it_buff[p++] = 0;
     it_buff[p] = 0;
 
-    it_rf_init();
+    if (radio_get_state() == RADIO_STATE_RX) {
+        radio_rx_off();
+    }
 
+    it_rf_init();
+    WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE * INTERTECHNO_SEQ_REPEAT);
     Strobe(RF_SCAL);            // re-calibrate radio
 
     // set an interrupt to trigger when the packet is fully sent
@@ -93,11 +108,11 @@ void it_tx_cmd(const uint8_t prefix, const uint8_t cmd)
     RF1AIE |= BIT9;             // Enable TX end-of-packet interrupt
 
     // factory remotes send the command sequence 4 times
-    for (i = 0; i < 4; i++) {
+    for (i = INTERTECHNO_SEQ_REPEAT; i>0; i--) {
         WriteBurstReg(RF_TXFIFOWR, it_buff, INTERTECHNO_SEQ_SIZE);
     }
+    radio_set_state(RADIO_STATE_TX);
     Strobe(RF_STX);             // transmit
-
 }
 
 static void it_tx_handler(uint32_t msg)

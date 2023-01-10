@@ -34,8 +34,13 @@
 #ifndef __RADIO_H__
 #define __RADIO_H__
 
-#define RADIO_TX_IRQ 0x1
-#define RADIO_RX_IRQ 0x2
+#define     RADIO_NO_IRQ  0x0
+#define     RADIO_TX_IRQ  0x1
+#define     RADIO_RX_IRQ  0x2
+
+#define RADIO_STATE_IDLE  0x0
+#define   RADIO_STATE_RX  0x1
+#define   RADIO_STATE_TX  0x2
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,6 +48,12 @@ extern "C" {
 
 uint8_t radio_get_event(void);
 void radio_rst_event(void);
+
+void radio_rx_on(void);
+void radio_rx_off(void);
+
+uint8_t radio_get_state(void);
+void radio_set_state(const uint8_t state);
 
 #ifdef __cplusplus
 }

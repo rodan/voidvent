@@ -54,17 +54,14 @@ void parse_user_input(void)
 #endif
     char f = input[0];
 
-    uint8_t it_family = 12;
-    uint8_t it_device = 6;
-
     if (f == '?') {
         display_menu();
     } else if (strstr(input, "on")) {
         sig0_on;
-        it_tx_cmd(((it_family - 1) << 4) + it_device - 1, INTERTECHNO_CMD_ON);
+        it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_ON);
     } else if (strstr(input, "off")) {
         sig0_on;
-        it_tx_cmd(((it_family - 1) << 4) + it_device - 1, INTERTECHNO_CMD_OFF);
+        it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_OFF);
     } else {
         //uart_tx_str("\r\n", 2);
     }
