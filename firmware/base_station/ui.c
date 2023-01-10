@@ -30,6 +30,37 @@ void display_version(void)
     uart_print(&bc, "\r\n");
 }
 
+void print_buf(uint8_t * data, const uint16_t size)
+{
+    uint16_t bytes_remaining = size;
+    uint16_t bytes_to_be_printed, bytes_printed = 0;
+    char itoa_buf[CONV_BASE_10_BUF_SZ];
+    uint16_t i;
+
+    while (bytes_remaining > 0) {
+
+        if (bytes_remaining > 16) {
+            bytes_to_be_printed = 16;
+        } else {
+            bytes_to_be_printed = bytes_remaining;
+        }
+
+        uart_print(&bc, _utoh16(itoa_buf, bytes_printed));
+        uart_print(&bc, ": ");
+
+        for (i = 0; i < bytes_to_be_printed; i++) {
+            uart_print(&bc, _utoh8(itoa_buf, data[bytes_printed + i]));
+            if (i & 0x1) {
+                uart_print(&bc, " ");
+            }
+        }
+
+        uart_print(&bc, "\r\n");
+        bytes_printed += bytes_to_be_printed;
+        bytes_remaining -= bytes_to_be_printed;
+    }
+}
+
 #define PARSER_CNT 16
 
 void parse_user_input(void)

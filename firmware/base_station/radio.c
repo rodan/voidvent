@@ -5,6 +5,7 @@
 #include "rf1a.h"
 #include "radio.h"
 
+uint8_t radio_rx_buffer[RADIO_RXBUF_SZ];
 volatile uint8_t radio_last_event = RADIO_NO_IRQ;
 uint8_t radio_state = RADIO_STATE_IDLE;
 
@@ -61,6 +62,8 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
 #error Compiler not supported!
 #endif
 {
+    uint8_t rx_sz;
+
     switch (__even_in_range(RF1AIV, 32)) {
     case 0:
         break;                  // No RF core interrupt pending
@@ -89,6 +92,12 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
             radio_last_event = RADIO_TX_IRQ;
             radio_state = RADIO_STATE_IDLE;
         } else if (radio_state == RADIO_STATE_RX) {
+            rx_sz = ReadSingleReg(RXBYTES);
+            if (rx_sz > RADIO_RXBUF_SZ) {
+                rx_sz = RADIO_RXBUF_SZ;
+            }
+            ReadBurstReg(RF_RXFIFORD, radio_rx_buffer, rx_sz);
+            __no_operation();
             radio_last_event = RADIO_RX_IRQ;
         } else {
             radio_state = RADIO_STATE_IDLE;

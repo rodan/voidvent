@@ -5,6 +5,7 @@
 #include "proj.h"
 #include "rf1a.h"
 #include "radio.h"
+#include "ui.h"
 #include "intertechno.h"
 
 // set logic 0 and logic 1 power levels for OOK modulation
@@ -21,6 +22,7 @@ static void it_tx_handler(uint32_t msg);
 static void it_rx_handler(uint32_t msg);
 
 extern const RF_SETTINGS rfSettings_fixed;
+extern uint8_t radio_rx_buffer[RADIO_RXBUF_SZ];
 
 void it_handler_init(void)
 {
@@ -119,11 +121,11 @@ static void it_tx_handler(uint32_t msg)
 {
     Strobe(RF_SIDLE);           // IDLE
     Strobe(RF_SFTX);            // flush TXFIFO
-    Strobe(RF_SPWD);            // power-down mode
+    //Strobe(RF_SPWD);            // power-down mode
 }
 
 static void it_rx_handler(uint32_t msg)
 {
-
+    print_buf(radio_rx_buffer, INTERTECHNO_SEQ_SIZE);
 }
 

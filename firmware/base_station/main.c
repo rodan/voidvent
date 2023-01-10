@@ -102,6 +102,11 @@ int main(void)
         check_events();
         check_events();
         check_events();
+
+        if (radio_get_state() == RADIO_STATE_IDLE) {
+            it_rx_on();
+            radio_rx_on();
+        }
     }
 
 }

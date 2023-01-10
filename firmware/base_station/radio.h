@@ -42,6 +42,8 @@
 #define   RADIO_STATE_RX  0x1
 #define   RADIO_STATE_TX  0x2
 
+#define   RADIO_RXBUF_SZ  16
+
 #ifdef __cplusplus
 extern "C" {
 #endif
