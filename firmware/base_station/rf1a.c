@@ -115,6 +115,9 @@ void WriteRfSettings(const RF_SETTINGS *pRfSettings) {
     WriteSingleReg(MCSM1 ,   pRfSettings->mcsm1);
     WriteSingleReg(MCSM0 ,   pRfSettings->mcsm0);
     WriteSingleReg(FOCCFG,   pRfSettings->foccfg);
+    WriteSingleReg(AGCCTRL2, pRfSettings->agcctrl2);
+    WriteSingleReg(AGCCTRL1, pRfSettings->agcctrl1);
+    WriteSingleReg(AGCCTRL0, pRfSettings->agcctrl0);
     WriteSingleReg(WOREVT1,  pRfSettings->worevt1);
     WriteSingleReg(WOREVT0,  pRfSettings->worevt0);
     WriteSingleReg(WORCTRL,  pRfSettings->worctrl);

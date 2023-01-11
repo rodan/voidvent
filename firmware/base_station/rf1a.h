@@ -19,6 +19,9 @@ typedef struct {
     uint8_t mcsm1;      // Main Radio Control State Machine Configuration
     uint8_t mcsm0;      // Main Radio Control State Machine Configuration
     uint8_t foccfg;     // Frequency Offset Compensation Configuration
+    uint8_t agcctrl2;   // Automatic gain control
+    uint8_t agcctrl1;   // Automatic gain control
+    uint8_t agcctrl0;   // Automatic gain control
     uint8_t worevt1;    // High Byte Event0 Timeout
     uint8_t worevt0;    // Low Byte Event0 Timeout
     uint8_t worctrl;    // Wake On Radio Control

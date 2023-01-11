@@ -64,6 +64,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
 {
     uint8_t rx_sz;
 
+    sig3_on;
     switch (__even_in_range(RF1AIV, 32)) {
     case 0:
         break;                  // No RF core interrupt pending
@@ -116,5 +117,6 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
     case 32:
         break;                  // RFIFG15
     }
+    sig3_off;
     __bic_SR_register_on_exit(LPM3_bits);
 }

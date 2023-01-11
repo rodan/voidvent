@@ -49,6 +49,9 @@ int main(void)
 #ifdef USE_SIG
     sig0_on;
 #endif
+    
+    // enable GDO1
+    P3SEL |= BIT6;
 
     PMM_setVCore(2);
     clock_pin_init();
@@ -88,13 +91,13 @@ int main(void)
 
     while (1) {
         // sleep
-#ifdef USE_SIG
+//#ifdef USE_SIG
         sig4_off;
-#endif
+//#endif
         _BIS_SR(LPM0_bits + GIE);
-#ifdef USE_SIG
+//#ifdef USE_SIG
         sig4_on;
-#endif
+//#endif
         __no_operation();
 //#ifdef USE_WATCHDOG
 //        WDTCTL = (WDTCTL & 0xff) | WDTPW | WDTCNTCL;

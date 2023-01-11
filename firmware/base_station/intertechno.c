@@ -9,11 +9,11 @@
 #include "intertechno.h"
 
 // set logic 0 and logic 1 power levels for OOK modulation
-// PATable[1] power level (based on SmartRF Studio)
-//#define INTERTECHNO_RF_POWER   0x26     // -12 dBm   ~13mA peak
-//#define INTERTECHNO_RF_POWER   0x2d     //  -6 dBm
-#define INTERTECHNO_RF_POWER   0x50     //   0 dBm
-//#define INTERTECHNO_RF_POWER   0xc6     //  10 dBm   ~18mA peak
+// PATable[1] power level (for 433MHz)
+//#define INTERTECHNO_RF_POWER   0x2d     //  -6 dBm  17mA
+//#define INTERTECHNO_RF_POWER   0x50     //   0 dBm  17mA
+#define INTERTECHNO_RF_POWER   0xc6     //  10 dBm  29mA
+//#define INTERTECHNO_RF_POWER   0xc0     //   max power  33mA
 uint8_t PATable[2] = { 0x00, INTERTECHNO_RF_POWER };
 
 static uint8_t rotate_byte(uint8_t in);
