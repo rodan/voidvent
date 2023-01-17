@@ -1,3 +1,7 @@
+
+constant length protocol
+32.8KHz freq
+
 8e 8e 88 8e 8e 88 8e 88  88 8e 8e 8e 80 00 00 00
 
 1  1  0  1  1  0  1  0   0  1  1  1  eol    
@@ -22,16 +26,9 @@ on
 
 
 
+variable lenght protocol
 
-
-
-    rv += (in & 0x10) << 3;
-    rv += (in & 0x20) << 1;
-    rv += (in & 0x40) >> 1;
-    rv += (in & 0x80) >> 3;
-    rv += (in & 0x1) << 3;
-    rv += (in & 0x2) << 1;
-    rv += (in & 0x4) >> 1;
-    rv += (in & 0x8) >> 3;
+ASK
+34.5KHz freq
 
 
