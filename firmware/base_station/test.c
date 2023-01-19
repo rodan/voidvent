@@ -6,8 +6,11 @@
 #include "radio.h"
 #include "test.h"
 
-const unsigned char test_tx_buffer[TEST_PACKET_LEN]= {0xAA, 0xBB, 0xCC, 0xDD, 0xEE};
+#define  RSSI_IDX           (PACKET_LEN)    // Index of appended RSSI 
+#define  CRC_LQI_IDX        (PACKET_LEN+1)  // Index of appended LQI, checksum
+#define  CRC_OK             (BIT7)          // CRC_OK bit
 
+const unsigned char test_tx_buffer[TEST_PACKET_LEN]= {0xAA, 0xBB, 0xCC, 0xDD, 0xEE};
 
 void transmit(unsigned char *buffer, unsigned char length)
 {
