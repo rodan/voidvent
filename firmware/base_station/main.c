@@ -10,9 +10,11 @@
 #include "rf1a.h"
 #include "radio.h"
 #include "ui.h"
+#include "test.h"
 #include "sig.h"
 
-uart_descriptor bc; // backchannel uart interface
+uart_descriptor bc;             // backchannel uart interface
+volatile uint8_t port1_last_event = 0;
 
 static void uart_bcl_rx_irq(uint32_t msg)
 {
@@ -41,6 +43,17 @@ void check_events(void)
     eh_exec(msg);
 }
 
+void init_button(void)
+{
+    // Set up the button as interruptible 
+    P1DIR &= ~BIT1;
+    P1REN |= BIT1;
+    P1IES &= ~BIT1;
+    P1IFG = 0;
+    P1OUT |= BIT1;
+    P1IE |= BIT1;
+}
+
 int main(void)
 {
     // stop watchdog
@@ -49,7 +62,9 @@ int main(void)
 #ifdef USE_SIG
     sig0_on;
 #endif
-    
+
+    init_button();
+
     // enable GDO1
     P3SEL |= BIT6;
 
@@ -70,9 +85,13 @@ int main(void)
     ResetRadioCore();
     InitRadio();
 
-    it_handler_init();
-    it_rx_on();
+    //it_handler_init();
+    //it_rx_on();
     radio_rx_on();
+
+    // enable button irq
+    P1IFG = 0;
+    P1IE |= BIT1;
 
 #ifdef USE_SIG
     sig0_off;
@@ -82,6 +101,7 @@ int main(void)
     sig4_off;
     //sig5_off;
 #endif
+
 
     eh_init();
     eh_register(&uart_bcl_rx_irq, SYS_MSG_UART_BCL_RX);
@@ -106,6 +126,12 @@ int main(void)
         check_events();
         check_events();
 
+        if (port1_last_event) {
+            port1_last_event = 0;
+            test_transmit();
+            P1IE |= BIT1;
+        }
+
         if (radio_get_state() == RADIO_STATE_IDLE) {
             it_rx_on();
             radio_rx_on();
@@ -114,4 +140,39 @@ int main(void)
 
 }
 
-
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
+#pragma vector=PORT1_VECTOR
+__interrupt void port1_isr_handler(void)
+#elif defined(__GNUC__)
+void __attribute__((interrupt(PORT1_VECTOR))) port1_isr_handler(void)
+#else
+#error Compiler not supported!
+#endif
+{
+    sig1_on;
+    switch (__even_in_range(P1IV, 16)) {
+    case 0:
+        break;
+    case 2:
+        break;                  // P1.0 IFG
+    case 4:                    // P1.1 IFG
+        P1IE = 0;
+        port1_last_event |= BIT1;
+        P1IFG = 0;
+        __bic_SR_register_on_exit(LPM3_bits);
+        break;
+    case 6:
+        break;                  // P1.2 IFG
+    case 8:
+        break;                  // P1.3 IFG
+    case 10:
+        break;                  // P1.4 IFG
+    case 12:
+        break;                  // P1.5 IFG
+    case 14:
+        break;                  // P1.6 IFG
+    case 16:
+        break;                  // P1.7 IFG
+    }
+    sig1_off;
+}

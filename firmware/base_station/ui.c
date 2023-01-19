@@ -4,7 +4,10 @@
 #include "glue.h"
 #include "sig.h"
 #include "intertechno.h"
+#include "radio.h"
+#include "rf1a.h"
 #include "version.h"
+#include "test.h"
 #include "ui.h"
 
 extern uart_descriptor bc;
@@ -93,6 +96,8 @@ void parse_user_input(void)
     } else if (strstr(input, "off")) {
         sig0_on;
         it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_OFF);
+    } else if (strstr(input, "test")) {
+        test_transmit();
     } else {
         //uart_tx_str("\r\n", 2);
     }

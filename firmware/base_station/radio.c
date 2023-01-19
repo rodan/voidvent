@@ -54,7 +54,7 @@ void radio_rx_off(void)
 }
 
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-#pragma vector=PORT5_VECTOR
+#pragma vector=CC1101_VECTOR
 __interrupt void cc1101_isr_handler(void)
 #elif defined(__GNUC__)
 void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)

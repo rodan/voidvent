@@ -21,7 +21,7 @@ static void it_rf_init(void);
 static void it_tx_handler(uint32_t msg);
 static void it_rx_handler(uint32_t msg);
 
-extern const RF_SETTINGS rfSettings_fixed;
+extern const RF_SETTINGS rfSettings;
 extern uint8_t radio_rx_buffer[RADIO_RXBUF_SZ];
 
 void it_handler_init(void)
@@ -33,7 +33,7 @@ void it_handler_init(void)
 static void it_rf_init(void)
 {
     ResetRadioCore();
-    WriteRfSettings(&rfSettings_fixed);
+    WriteRfSettings(&rfSettings);
     WriteBurstPATable(&PATable[0], 2);
 }
 
@@ -54,11 +54,11 @@ static uint8_t rotate_byte(uint8_t in)
 void it_rx_on(void)
 {
     it_rf_init();
-    WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE);
+    //WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE);
     //WriteSingleReg(SYNC0, (rotate_byte(INTERTECHNO_FAMILY) & 0xf0) >> 2);
     //WriteSingleReg(SYNC1, rotate_byte(INTERTECHNO_FAMILY) & 0x0f);
-    WriteSingleReg(SYNC0, 0x8e);
-    WriteSingleReg(SYNC1, 0x8e);
+    //WriteSingleReg(SYNC0, 0x8e);
+    //WriteSingleReg(SYNC1, 0x8e);
     //radio_set_state(RADIO_STATE_RX);
 }
 
