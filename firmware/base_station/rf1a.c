@@ -34,7 +34,8 @@
 //#define RF_POWER   0xc0     //   max power  33mA
 uint8_t PATable[2] = { 0x00, RF_POWER };
 #else
-#define  PATABLE_VAL        (0x51)      // 0 dBm output
+#define  PATABLE_VAL        (0xc3)      // +10 dBm output
+//#define  PATABLE_VAL        (0x51)      // 0 dBm output
 #endif
 
 extern const RF_SETTINGS rfSettings;

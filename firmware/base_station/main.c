@@ -85,7 +85,6 @@ int main(void)
     ResetRadioCore();
     InitRadio();
 
-    //it_handler_init();
     //it_rx_on();
     radio_rx_on();
 
@@ -102,9 +101,9 @@ int main(void)
     //sig5_off;
 #endif
 
-
     eh_init();
     eh_register(&uart_bcl_rx_irq, SYS_MSG_UART_BCL_RX);
+    it_handler_init();
     _BIS_SR(GIE);
 
     display_version();

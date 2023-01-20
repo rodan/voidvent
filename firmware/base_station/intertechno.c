@@ -3,6 +3,7 @@
 #include <msp430.h>
 #include "glue.h"
 #include "proj.h"
+#include "sig.h"
 #include "rf1a.h"
 #include "radio.h"
 #include "ui.h"
