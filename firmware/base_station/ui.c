@@ -91,10 +91,10 @@ void parse_user_input(void)
     if (f == '?') {
         display_menu();
     } else if (strstr(input, "on")) {
-        sig0_on;
+        sig1_on;
         it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_ON);
     } else if (strstr(input, "off")) {
-        sig0_on;
+        sig1_on;
         it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_OFF);
     } else if (strstr(input, "test")) {
         test_transmit();

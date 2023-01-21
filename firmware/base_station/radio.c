@@ -35,6 +35,9 @@ void radio_rx_on(void)
     RF1AIFG &= ~BIT9;           // Clear a pending interrupt
     RF1AIE |= BIT9;             // Enable the interrupt 
 
+    RF1AIFG &= ~BITD;           // Clear a pending interrupt
+    RF1AIE |= BITD;             // Enable the interrupt 
+
     // Radio is in IDLE following a TX, so strobe SRX to enter Receive Mode
     Strobe(RF_SRX);
     radio_state = RADIO_STATE_RX;
@@ -44,6 +47,9 @@ void radio_rx_off(void)
 {
     RF1AIE &= ~BIT9;            // Disable RX interrupts
     RF1AIFG &= ~BIT9;           // Clear pending IFG
+
+    RF1AIE &= ~BITD;            // Disable RX interrupts
+    RF1AIFG &= ~BITD;           // Clear pending IFG
 
     // It is possible that radio_rx_off is called while radio is receiving a packet.
     // Therefore, it is necessary to flush the RX FIFO after issuing IDLE strobe 
@@ -89,7 +95,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
     case 20:                    // RFIFG9
         if (radio_state == RADIO_STATE_TX) {
             RF1AIE &= ~BIT9;    // Disable TX end-of-packet interrupt
-            sig0_off;
+            sig1_off;
             radio_last_event = RADIO_TX_IRQ;
             radio_state = RADIO_STATE_IDLE;
         } else if (radio_state == RADIO_STATE_RX) {
@@ -99,9 +105,9 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
             }
             ReadBurstReg(RF_RXFIFORD, radio_rx_buffer, rx_sz);
             __no_operation();
-            if (radio_rx_buffer[6] & BIT7) {
-                sig0_switch;
-            }
+            //if (radio_rx_buffer[6] & BIT7) {
+                sig1_switch;
+            //}
             radio_rx_on();
             radio_last_event = RADIO_RX_IRQ;
         } else {
@@ -115,6 +121,8 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
     case 26:
         break;                  // RFIFG12
     case 28:
+        // RSSI above threshold
+        sig2_switch; // page 675
         break;                  // RFIFG13
     case 30:
         break;                  // RFIFG14

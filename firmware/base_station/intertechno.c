@@ -9,16 +9,8 @@
 #include "ui.h"
 #include "intertechno.h"
 
-// set logic 0 and logic 1 power levels for OOK modulation
-// PATable[1] power level (for 433MHz)
-//#define INTERTECHNO_RF_POWER   0x2d     //  -6 dBm  17mA
-//#define INTERTECHNO_RF_POWER   0x50     //   0 dBm  17mA
-#define INTERTECHNO_RF_POWER   0xc6     //  10 dBm  29mA
-//#define INTERTECHNO_RF_POWER   0xc0     //   max power  33mA
-uint8_t PATable[2] = { 0x00, INTERTECHNO_RF_POWER };
-
 static uint8_t rotate_byte(uint8_t in);
-static void it_rf_init(void);
+//static void it_rf_init(void);
 static void it_tx_handler(uint32_t msg);
 static void it_rx_handler(uint32_t msg);
 
@@ -31,12 +23,14 @@ void it_handler_init(void)
     eh_register(&it_rx_handler, SYS_MSG_CC_RX);
 }
 
+#if 0
 static void it_rf_init(void)
 {
     ResetRadioCore();
     WriteRfSettings(&rfSettings);
     WriteBurstPATable(&PATable[0], 2);
 }
+#endif
 
 static uint8_t rotate_byte(uint8_t in)
 {
@@ -54,8 +48,8 @@ static uint8_t rotate_byte(uint8_t in)
 
 void it_rx_on(void)
 {
-    it_rf_init();
-    //WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE);
+    //it_rf_init();
+    WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE);
     //WriteSingleReg(SYNC0, (rotate_byte(INTERTECHNO_FAMILY) & 0xf0) >> 2);
     //WriteSingleReg(SYNC1, rotate_byte(INTERTECHNO_FAMILY) & 0x0f);
     //WriteSingleReg(SYNC0, 0x8e);
@@ -101,7 +95,7 @@ void it_tx_cmd(const uint8_t prefix, const uint8_t cmd)
         radio_rx_off();
     }
 
-    it_rf_init();
+    //it_rf_init();
     WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE * INTERTECHNO_SEQ_REPEAT);
     Strobe(RF_SCAL);            // re-calibrate radio
 

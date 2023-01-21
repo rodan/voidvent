@@ -60,13 +60,15 @@ int main(void)
     WDTCTL = WDTPW | WDTHOLD;
     msp430_hal_init(HAL_GPIO_DIR_OUTPUT | HAL_GPIO_OUT_LOW);
 #ifdef USE_SIG
-    sig0_on;
+    //sig0_on;
 #endif
 
-    init_button();
-
+    // enable GDO0
+    P1SEL |= BIT0;
     // enable GDO1
     P3SEL |= BIT6;
+    // enable GDO2
+    P1SEL |= BIT1;
 
     PMM_setVCore(2);
     clock_pin_init();
@@ -85,15 +87,18 @@ int main(void)
     ResetRadioCore();
     InitRadio();
 
-    //it_rx_on();
+    it_rx_on();
     radio_rx_on();
 
+#if defined (CONFIG_BUTTON)
+    init_button();
     // enable button irq
     P1IFG = 0;
     P1IE |= BIT1;
+#endif
 
 #ifdef USE_SIG
-    sig0_off;
+    //sig0_off;
     sig1_off;
     sig2_off;
     sig3_off;
@@ -125,19 +130,23 @@ int main(void)
         check_events();
         check_events();
 
+#if 0
         if (port1_last_event) {
             port1_last_event = 0;
             test_transmit();
             P1IE |= BIT1;
         }
+#endif
 
         if (radio_get_state() == RADIO_STATE_IDLE) {
-            //it_rx_on();
+            it_rx_on();
             radio_rx_on();
         }
     }
 
 }
+
+#if defined (CONFIG_BUTTON)
 
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector=PORT1_VECTOR
@@ -175,3 +184,5 @@ void __attribute__((interrupt(PORT1_VECTOR))) port1_isr_handler(void)
     }
     sig1_off;
 }
+
+#endif

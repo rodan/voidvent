@@ -3,9 +3,11 @@
 
 #include <msp430.h>
 
+#if 0
 #define sig0_on              P1OUT |= BIT0
 #define sig0_off             P1OUT &= ~BIT0
 #define sig0_switch          P1OUT ^= BIT0
+#endif
 
 #define sig1_on              P3OUT |= BIT0
 #define sig1_off             P3OUT &= ~BIT0

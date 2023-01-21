@@ -25,14 +25,14 @@ void transmit(unsigned char *buffer, unsigned char length)
 
 void test_transmit(void)
 {
-    sig0_on;
+    //sig0_on;
     if (radio_get_state() == RADIO_STATE_RX) {
         radio_rx_off();
     }
   
     radio_set_state(RADIO_STATE_TX);
     transmit( (unsigned char*)test_tx_buffer, sizeof test_tx_buffer);
-    sig0_off;
+    //sig0_off;
 }
 
 

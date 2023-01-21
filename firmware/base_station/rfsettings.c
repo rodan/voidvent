@@ -2,8 +2,16 @@
 #include "rf1a.h"
 #include "intertechno.h"
 
-//#define RF_INTERTECHNO_FIXED
-#define RF_FIXED_LT_FIFO
+#define RF_INTERTECHNO_FIXED
+//#define RF_FIXED_LT_FIFO
+//#define RF_1KBAUD_HIGHSENS_FSK
+//#define RF_1KBAUD_HIGHSENS_OOK
+//#define RF_1KBAUD_LOWPWR_FSK
+//#define RF_1KBAUD_LOWPWR_OOK
+//#define RF_38KBAUD_HIGHSENS_FSK
+//#define RF_38KBAUD_HIGHSENS_OOK
+//#define RF_38KBAUD_LOWPWR_FSK
+//#define RF_38KBAUD_LOWPWR_OOK
 
 #if defined(RF_DEFAULTS)
 // Address Config = No address check 
@@ -92,7 +100,7 @@ const RF_SETTINGS rfSettings = {
 // Manchester Enable = false 
 // Modulation Format = ASK/OOK 
 // PA Ramping = false 
-// Packet Length = 255 
+// Packet Length = 16 
 // Packet Length Mode = Fixed packet length mode. Length configured in PKTLEN register 
 // Preamble Count = 2 
 // RX Filter BW = 203.125000 
@@ -102,13 +110,13 @@ const RF_SETTINGS rfSettings = {
 // Rf settings for CC430
 const RF_SETTINGS rfSettings = {
     0x29,  // IOCFG2        GDO2 Output Configuration
-    0x09,  // IOCFG1        GDO1 Output Configuration
-    0x06,  // IOCFG0        GDO0 Output Configuration
-    0x07,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
+    0x0d, //0x0e,  // IOCFG1        GDO1 Output Configuration
+    0x0e,  // IOCFG0        GDO0 Output Configuration
+    0x67,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
     0x91,  // SYNC0         Sync Word, Low Byte
     0xff,  // PKTLEN        Packet Length
-    0x04,  // PKTCTRL1      Packet Automation Control
+    0x00, //0x04,  // PKTCTRL1      Packet Automation Control
     0x00,  // PKTCTRL0      Packet Automation Control
     0x00,  // ADDR          Device Address
     0x00,  // CHANNR        Channel Number
@@ -119,7 +127,7 @@ const RF_SETTINGS rfSettings = {
     0x71,  // FREQ0         Frequency Control Word, Low Byte
     0x86,  // MDMCFG4       Modem Configuration
     0x70,  // MDMCFG3       Modem Configuration
-    0x32,  // MDMCFG2       Modem Configuration
+    0x37, // 0x34,  // MDMCFG2       Modem Configuration
     0x02,  // MDMCFG1       Modem Configuration
     0xf8,  // MDMCFG0       Modem Configuration
     0x47,  // DEVIATN       Modem Deviation Setting
@@ -173,7 +181,7 @@ const RF_SETTINGS rfSettings = {
 // Rf settings for CC430
 const RF_SETTINGS rfSettings = {
     0x29,  // IOCFG2        GDO2 Output Configuration
-    0x2e,  // IOCFG1        GDO1 Output Configuration
+    0x0e,  // IOCFG1        GDO1 Output Configuration
     0x06,  // IOCFG0        GDO0 Output Configuration
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
@@ -244,12 +252,12 @@ const RF_SETTINGS rfSettings = {
 // Rf settings for CC430
 const RF_SETTINGS rfSettings = {
     0x29,  // IOCFG2        GDO2 Output Configuration
-    0x2e,  // IOCFG1        GDO1 Output Configuration
+    0x0d,  // IOCFG1        GDO1 Output Configuration
     0x06,  // IOCFG0        GDO0 Output Configuration
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
     0x91,  // SYNC0         Sync Word, Low Byte
-    0xff,  // PKTLEN        Packet Length
+    0x05,  // PKTLEN        Packet Length
     0x04,  // PKTCTRL1      Packet Automation Control
     0x05,  // PKTCTRL0      Packet Automation Control
     0x00,  // ADDR          Device Address
@@ -320,7 +328,7 @@ const RF_SETTINGS rfSettings = {
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
     0x91,  // SYNC0         Sync Word, Low Byte
-    0xff,  // PKTLEN        Packet Length
+    0x05,  // PKTLEN        Packet Length
     0x04,  // PKTCTRL1      Packet Automation Control
     0x12,  // PKTCTRL0      Packet Automation Control
     0x00,  // ADDR          Device Address
@@ -391,7 +399,7 @@ const RF_SETTINGS rfSettings = {
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
     0x91,  // SYNC0         Sync Word, Low Byte
-    0xff,  // PKTLEN        Packet Length
+    0x05,  // PKTLEN        Packet Length
     0x04,  // PKTCTRL1      Packet Automation Control
     0x05,  // PKTCTRL0      Packet Automation Control
     0x00,  // ADDR          Device Address
@@ -462,7 +470,7 @@ const RF_SETTINGS rfSettings = {
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
     0x91,  // SYNC0         Sync Word, Low Byte
-    0xff,  // PKTLEN        Packet Length
+    0x05,  // PKTLEN        Packet Length
     0x04,  // PKTCTRL1      Packet Automation Control
     0x12,  // PKTCTRL0      Packet Automation Control
     0x00,  // ADDR          Device Address
@@ -528,14 +536,14 @@ const RF_SETTINGS rfSettings = {
 // Rf settings for CC430
 const RF_SETTINGS rfSettings = {
     0x29,  // IOCFG2        GDO2 Output Configuration
-    0x2e,  // IOCFG1        GDO1 Output Configuration
+    0x0d,  // IOCFG1        GDO1 Output Configuration
     0x06,  // IOCFG0        GDO0 Output Configuration
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
     0x91,  // SYNC0         Sync Word, Low Byte
-    0xff,  // PKTLEN        Packet Length
+    0x05,  // PKTLEN        Packet Length
     0x04,  // PKTCTRL1      Packet Automation Control
-    0x05,  // PKTCTRL0      Packet Automation Control
+    0x04,  // PKTCTRL0      Packet Automation Control
     0x00,  // ADDR          Device Address
     0x00,  // CHANNR        Channel Number
     0x06,  // FSCTRL1       Frequency Synthesizer Control
@@ -559,7 +567,7 @@ const RF_SETTINGS rfSettings = {
     0x91,  // AGCCTRL0      AGC Control
     0x80,  // WOREVT1       High Byte Event0 Timeout
     0x00,  // WOREVT0       Low Byte Event0 Timeout
-    0xfb,  // WORCTRL       Wake On Radio Control
+    0xf0,  // WORCTRL       Wake On Radio Control
     0x56,  // FREND1        Front End RX Configuration
     0x10,  // FREND0        Front End TX Configuration
     0xe9,  // FSCAL3        Frequency Synthesizer Calibration
@@ -599,7 +607,7 @@ const RF_SETTINGS rfSettings = {
 // Rf settings for CC430
 const RF_SETTINGS rfSettings = {
     0x0b,  // IOCFG2        GDO2 Output Configuration
-    0x2e,  // IOCFG1        GDO1 Output Configuration
+    0x0d,  // IOCFG1        GDO1 Output Configuration
     0x2d,  // IOCFG0        GDO0 Output Configuration
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
@@ -675,9 +683,9 @@ const RF_SETTINGS rfSettings = {
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
     0x91,  // SYNC0         Sync Word, Low Byte
-    0xff,  // PKTLEN        Packet Length
+    0x05,  // PKTLEN        Packet Length
     0x04,  // PKTCTRL1      Packet Automation Control
-    0x05,  // PKTCTRL0      Packet Automation Control
+    0x04,  // PKTCTRL0      Packet Automation Control
     0x00,  // ADDR          Device Address
     0x00,  // CHANNR        Channel Number
     0x08,  // FSCTRL1       Frequency Synthesizer Control
@@ -746,7 +754,7 @@ const RF_SETTINGS rfSettings = {
     0x47,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
     0xd3,  // SYNC1         Sync Word, High Byte
     0x91,  // SYNC0         Sync Word, Low Byte
-    0xff,  // PKTLEN        Packet Length
+    0x05,  // PKTLEN        Packet Length
     0x04,  // PKTCTRL1      Packet Automation Control
     0x12,  // PKTCTRL0      Packet Automation Control
     0x00,  // ADDR          Device Address

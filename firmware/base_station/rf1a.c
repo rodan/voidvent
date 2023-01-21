@@ -25,14 +25,16 @@
 #define ENTER_CRITICAL_SECTION(x)  	st( x = __get_SR_register(); __dint(); )
 #define EXIT_CRITICAL_SECTION(x)	__bis_SR_register(x)
 
-#if RF_OOK
+#define RF_OOK
+
+#if defined(RF_OOK)
 // set logic 0 and logic 1 power levels for OOK modulation
 // PATable[1] power level (for 433MHz)
 //#define RF_POWER   0x2d     //  -6 dBm  17mA
 //#define RF_POWER   0x50     //   0 dBm  17mA
 #define RF_POWER   0xc6         //  10 dBm  29mA
 //#define RF_POWER   0xc0     //   max power  33mA
-uint8_t PATable[2] = { 0x00, RF_POWER };
+static uint8_t PATable[2] = { 0x00, RF_POWER };
 #else
 #define  PATABLE_VAL        (0xc3)      // +10 dBm output
 //#define  PATABLE_VAL        (0x51)      // 0 dBm output
@@ -358,5 +360,10 @@ void InitRadio(void)
     PMMCTL0_H = 0x00;
 
     WriteRfSettings(&rfSettings);
-    WriteSinglePATable(PATABLE_VAL);
+
+    #if defined(RF_OOK)
+        WriteBurstPATable(&PATable[0], 2);
+    #else
+        WriteSinglePATable(PATABLE_VAL);
+    #endif
 }
