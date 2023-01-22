@@ -133,7 +133,7 @@ const RF_SETTINGS rfSettings = {
     0x47,  // DEVIATN       Modem Deviation Setting
     0x07,  // MCSM2         Main Radio Control State Machine Configuration
     0x30,  // MCSM1         Main Radio Control State Machine Configuration
-    0x00,  // MCSM0         Main Radio Control State Machine Configuration
+    0x10, //0x00,  // MCSM0         Main Radio Control State Machine Configuration
     0x16,  // FOCCFG        Frequency Offset Compensation Configuration
     0x6c,  // BSCFG         Bit Synchronization Configuration
     0x43,  // AGCCTRL2      AGC Control

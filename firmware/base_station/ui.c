@@ -15,6 +15,7 @@ extern uart_descriptor bc;
 static const char menu_str[]="\
  available commands:\r\n\r\n\
 \033[33;1m?\033[0m   - show menu\r\n\
+\033[33;1mrst\033[0m - POR\r\n\
 \033[33;1mon\033[0m  - power on device L6\r\n\
 \033[33;1moff\033[0m - power off device L6\r\n";
 
@@ -98,6 +99,8 @@ void parse_user_input(void)
         it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_OFF);
     } else if (strstr(input, "test")) {
         test_transmit();
+    } else if (strstr(input, "rst")) {
+        HWREG8(PMM_BASE + OFS_PMMCTL0_L) |= PMMSWPOR;
     } else {
         //uart_tx_str("\r\n", 2);
     }
