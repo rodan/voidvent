@@ -95,7 +95,6 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
     case 20:                    // RFIFG9
         if (radio_state == RADIO_STATE_TX) {
             RF1AIE &= ~BIT9;    // Disable TX end-of-packet interrupt
-            sig1_off;
             radio_last_event = RADIO_TX_IRQ;
             radio_state = RADIO_STATE_IDLE;
         } else if (radio_state == RADIO_STATE_RX) {
@@ -105,9 +104,6 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
             }
             ReadBurstReg(RF_RXFIFORD, radio_rx_buffer, rx_sz);
             __no_operation();
-            //if (radio_rx_buffer[6] & BIT7) {
-                sig1_switch;
-            //}
             radio_rx_on();
             radio_last_event = RADIO_RX_IRQ;
         } else {

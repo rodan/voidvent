@@ -13,7 +13,8 @@
 #include "test.h"
 #include "sig.h"
 
-uart_descriptor bc;             // backchannel uart interface
+uart_descriptor bc; ///< backchannel uart interface
+sch_descriptor sch; ///< scheduler structure
 volatile uint8_t port1_last_event = 0;
 
 static void uart_bcl_rx_irq(uint32_t msg)
@@ -25,6 +26,7 @@ static void uart_bcl_rx_irq(uint32_t msg)
 void check_events(void)
 {
     uint16_t msg = SYS_MSG_NULL;
+    uint16_t ev = 0;
 
     // uart RX
     if (uart_get_event(&bc) & UART_EV_RX) {
@@ -39,6 +41,19 @@ void check_events(void)
         msg |= SYS_MSG_CC_RX;
         radio_rst_event();
     }
+    // scheduler
+    if (sch_get_event(&sch)) {
+        msg |= SYS_MSG_SCHEDULER;
+        sch_rst_event(&sch);
+    }
+    ev = sch_get_event_schedule(&sch);
+    if (ev) {
+        if (ev & (1 << SCHEDULE_PARSE_TMOUT)) {
+            msg |= SYS_MSG_PARSE_TMOUT;
+        }
+        sch_rst_event_schedule(&sch);
+    }
+
 
     eh_exec(msg);
 }
@@ -52,6 +67,11 @@ void init_button(void)
     P1IFG = 0;
     P1OUT |= BIT1;
     P1IE |= BIT1;
+}
+
+static void scheduler_irq(uint32_t msg)
+{
+    sch_handler(&sch);
 }
 
 int main(void)
@@ -84,6 +104,9 @@ int main(void)
     uart_set_rx_irq_handler(&bc, uart_rx_simple_handler);
 #endif
 
+    sch.baseAddress = TIMER_A1_BASE;
+    sch_init(&sch);
+
     ResetRadioCore();
     InitRadio();
 
@@ -108,6 +131,7 @@ int main(void)
 
     eh_init();
     eh_register(&uart_bcl_rx_irq, SYS_MSG_UART_BCL_RX);
+    eh_register(&scheduler_irq, SYS_MSG_SCHEDULER);
     it_handler_init();
     _BIS_SR(GIE);
 
@@ -157,7 +181,6 @@ void __attribute__((interrupt(PORT1_VECTOR))) port1_isr_handler(void)
 #error Compiler not supported!
 #endif
 {
-    sig1_on;
     switch (__even_in_range(P1IV, 16)) {
     case 0:
         break;
@@ -182,7 +205,6 @@ void __attribute__((interrupt(PORT1_VECTOR))) port1_isr_handler(void)
     case 16:
         break;                  // P1.7 IFG
     }
-    sig1_off;
 }
 
 #endif

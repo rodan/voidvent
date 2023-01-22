@@ -13,9 +13,22 @@
 	\sa eh_register()
 */
 
-#define           SYS_MSG_NULL  0
-#define    SYS_MSG_UART_BCL_RX  0x1   // UART received something
-#define          SYS_MSG_CC_RX  0x2   // tranceiver RX flag
-#define          SYS_MSG_CC_TX  0x4   // transceiver TX has finished 
+#define                  SYS_MSG_NULL  0
+#define           SYS_MSG_UART_BCL_RX  0x1   ///< UART received something
+#define                 SYS_MSG_CC_RX  0x2   ///< tranceiver RX flag
+#define                 SYS_MSG_CC_TX  0x4   ///< transceiver TX has finished 
+#define             SYS_MSG_SCHEDULER  0x8   ///< scheduler has triggered
+#define           SYS_MSG_PARSE_TMOUT  0x10  ///< scheduled timeout of parsing
+
+#define          SCHEDULE_PARSE_TMOUT  SCH_SLOT_0
+//#define                                SCH_SLOT_1
+//#define                                SCH_SLOT_2
+//#define                                SCH_SLOT_3
+//#define                                SCH_SLOT_4
+//#define                                SCH_SLOT_5
+//#define                                SCH_SLOT_6
+//#define                                SCH_SLOT_7
+//#define                                SCH_SLOT_8
+
 
 #endif

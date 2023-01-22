@@ -15,6 +15,8 @@
 #define UART_TXBUF_SZ 32
 #define UART_TX_USES_IRQ
 
+#define SCH_USES_T1A
+
 #define INTERTECHNO_FAMILY 11
 #define INTERTECHNO_DEVICE 5
 
