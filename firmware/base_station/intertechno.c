@@ -17,20 +17,13 @@ static void it_rx_handler(uint32_t msg);
 extern const RF_SETTINGS rfSettings;
 extern uint8_t radio_rx_buffer[RADIO_RXBUF_SZ];
 
-#define IT_SIG_SZ  64
+#define      IT_SIG_SZ  33
+#define IT_CMD_MAX_CNT  4
 
-uint16_t it_w[IT_SIG_SZ];
-uint16_t it_w_cnt = 0;
-
-uint16_t it_cmd[IT_SIG_SZ];
+uint8_t it_w[IT_SIG_SZ];
+uint8_t it_w_cnt = 0;
+uint16_t it_cmd[IT_CMD_MAX_CNT];
 uint16_t it_cmd_cnt = 0;
-
-#define ST_ITV_SYNC_H
-#define ST_ITV_SYNC_L
-#define ST_ITV_WORD
-#define ST_ITV_WORD_SEP
-
-#define ST_ITF_WORD
 
 void it_handler_init(void)
 {
@@ -41,13 +34,13 @@ void it_handler_init(void)
 void it_decode_rst(void)
 {
     it_w_cnt = 0;
-    memset(it_w, 0, IT_SIG_SZ * 2);
+    memset(it_w, 0, IT_SIG_SZ);
 }
 
 void it_cmd_rst(void)
 {
     it_cmd_cnt = 0;
-    memset(it_cmd, 0, IT_SIG_SZ * 2);
+    memset(it_cmd, 0, IT_CMD_MAX_CNT * 2);
 }
 
 void it_decode(const uint16_t interval, const uint8_t pol)
@@ -85,7 +78,7 @@ void it_decode(const uint16_t interval, const uint8_t pol)
             }
         } else if (interval > ITV_CMD_SEP_MIN) {
             // command is done
-            if (it_w_cnt < 10) {
+            if ((it_w_cnt < 10) || (it_cmd_cnt > IT_CMD_MAX_CNT - 1)) {
                 it_decode_rst();
                 return;
             }
@@ -163,7 +156,6 @@ void it_decode(const uint16_t interval, const uint8_t pol)
             }
 
             it_cmd[it_cmd_cnt] = (cmd << 8) | (4 * multiplier + device);
-            //it_cmd[it_cmd_cnt] = (it_w[it_w_cnt-3] << 12) | (it_w[it_w_cnt-2] << 8) | (it_w[it_w_cnt-1] << 4) | it_w[it_w_cnt];
             it_cmd_cnt++;
         }
     }
@@ -225,7 +217,6 @@ void it_tx_cmd(const uint8_t prefix, const uint8_t cmd)
     if (radio_get_state() == RADIO_STATE_RX) {
         radio_rx_off();
     }
-    //it_rf_init();
     WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE * INTERTECHNO_SEQ_REPEAT);
     Strobe(RF_SCAL);            // re-calibrate radio
 
