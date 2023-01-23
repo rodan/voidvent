@@ -1,0 +1,6 @@
+
+add scheduler on timerA
+add GDO1 signal decoding
+add watchdog
+fix exuberant-ctags to include generic header
+

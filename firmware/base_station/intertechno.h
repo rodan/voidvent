@@ -34,11 +34,29 @@
 #ifndef __INTERTECHNO_H__
 #define __INTERTECHNO_H__
 
-#define INTERTECHNO_CMD_ON  0x07        // command for turning switches on
-#define INTERTECHNO_CMD_OFF 0x06        // command for turning switches off
-#define INTERTECHNO_CMD_SP  0x0f        // special devices like doorbells, PIR detectors use this cmd
-#define INTERTECHNO_SEQ_SIZE  16        // sequence buffer size to be allocated
+#define     INTERTECHNO_CMD_ON  0x07    // command for turning switches on
+#define    INTERTECHNO_CMD_OFF  0x06    // command for turning switches off
+#define     INTERTECHNO_CMD_SP  0x0f    // special devices like doorbells, PIR detectors use this cmd
+#define   INTERTECHNO_SEQ_SIZE  16      // sequence buffer size to be allocated
 #define INTERTECHNO_SEQ_REPEAT  4       // how many times will the sequence be repeated
+
+#define           ITV_VARIANCE  24      // 96us
+#define         ITV_BLIP_TICKS  70      // 280us
+#define             ITV_SYNC_L  670     // 2680us
+#define           ITV_WORD_SEP  325     // 1300us
+#define            ITV_CMD_SEP  2600    // 10400us
+
+#define           ITV_BLIP_MIN  (ITV_BLIP_TICKS - ITV_VARIANCE)
+#define           ITV_BLIP_MAX  (ITV_BLIP_TICKS + ITV_VARIANCE)
+
+#define         ITV_SYNC_L_MIN  (ITV_SYNC_L - ITV_VARIANCE)
+#define         ITV_SYNC_L_MAX  (ITV_SYNC_L + ITV_VARIANCE)
+
+#define       ITV_WORD_SEP_MIN  (ITV_WORD_SEP - ITV_VARIANCE)
+#define       ITV_WORD_SEP_MAX  (ITV_WORD_SEP + ITV_VARIANCE)
+
+#define        ITV_CMD_SEP_MIN  (ITV_CMD_SEP - ITV_VARIANCE)
+#define        ITV_CMD_SEP_MAX  (ITV_CMD_SEP + ITV_VARIANCE)
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +64,12 @@ extern "C" {
 
 void it_handler_init(void);
 void it_tx_cmd(const uint8_t prefix, const uint8_t cmd);
-void it_rx_on(void);
+
+void it_decode_rst(void);
+void it_decode(const uint16_t interval, const uint8_t pol);
+void it_decode_debug(void);
+
+void it_cmd_rst(void);
 
 #ifdef __cplusplus
 }

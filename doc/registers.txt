@@ -1,0 +1,26 @@
+IOCFGx:
+
+0x26 - default, pin is floating
+0x09 - Clear channel assessment. High when RSSI level is below threshold (dependent on the current CCA_MODE setting). goes low for 4.1ms during incoming 5byte packet (RF_FIXED_LT_FIFO)
+0x0c - Serial Synchronous Data Output. Used for synchronous serial mode. always low.
+0x0d - Serial Data Output. Used for asynchronous serial mode. shows demodulated input
+0x0e - Carrier sense. High if RSSI level is above threshold. high for 3ms during incoming 5byte packet
+
+
+
+lt fifo vs demo fsk
+
+PKTLEN 0x05
+PKTCTRL0 0x04
+WORCTRL 0xf0
+
+
+demo fsk vs demo ook
+
+PKTLEN 0xff     (0x05)
+IOCGF2 0x0b     (0x29)
+IOCFG0 0x2d     (0x06)
+PKTCTRL0 0x12   (0x00)
+MDMCFG2 0x30
+FREND0 0x11
+

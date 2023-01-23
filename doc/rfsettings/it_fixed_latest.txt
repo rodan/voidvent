@@ -1,0 +1,69 @@
+// Address Config = No address check 
+// Base Frequency = 433.919830 
+// CRC Autoflush = false 
+// CRC Enable = false 
+// Carrier Frequency = 433.919830 
+// Channel Number = 0 
+// Channel Spacing = 199.951172 
+// Data Format = Normal mode 
+// Data Rate = 2.28119 
+// Deviation = 47.607422 
+// Device Address = 0 
+// Manchester Enable = false 
+// Modulation Format = ASK/OOK 
+// PA Ramping = false 
+// Packet Length = 16 
+// Packet Length Mode = Fixed packet length mode. Length configured in PKTLEN register 
+// Preamble Count = 2 
+// RX Filter BW = 203.125000 
+// Sync Word Qualifier Mode = 16/16 sync word bits detected 
+// TX Power = 10 
+// Whitening = false 
+// Rf settings for CC430
+const RF_SETTINGS rfSettings = {
+    0x29,  // IOCFG2        GDO2 Output Configuration
+    0x0d, //0x0e,  // IOCFG1        GDO1 Output Configuration
+    0x0e,  // IOCFG0        GDO0 Output Configuration
+    0x67,  // FIFOTHR       RX FIFO and TX FIFO Thresholds
+    0xd3,  // SYNC1         Sync Word, High Byte
+    0x91,  // SYNC0         Sync Word, Low Byte
+    0xff,  // PKTLEN        Packet Length
+    0x00, //0x04,  // PKTCTRL1      Packet Automation Control
+    0x00,  // PKTCTRL0      Packet Automation Control
+    0x00,  // ADDR          Device Address
+    0x00,  // CHANNR        Channel Number
+    0x0f,  // FSCTRL1       Frequency Synthesizer Control
+    0x00,  // FSCTRL0       Frequency Synthesizer Control
+    0x10,  // FREQ2         Frequency Control Word, High Byte
+    0xb0,  // FREQ1         Frequency Control Word, Middle Byte
+    0x71,  // FREQ0         Frequency Control Word, Low Byte
+    0x86,  // MDMCFG4       Modem Configuration
+    0x70,  // MDMCFG3       Modem Configuration
+    0x37, // 0x34,  // MDMCFG2       Modem Configuration
+    0x02,  // MDMCFG1       Modem Configuration
+    0xf8,  // MDMCFG0       Modem Configuration
+    0x47,  // DEVIATN       Modem Deviation Setting
+    0x07,  // MCSM2         Main Radio Control State Machine Configuration
+    0x30,  // MCSM1         Main Radio Control State Machine Configuration
+    0x00,  // MCSM0         Main Radio Control State Machine Configuration
+    0x16,  // FOCCFG        Frequency Offset Compensation Configuration
+    0x6c,  // BSCFG         Bit Synchronization Configuration
+    0x43,  // AGCCTRL2      AGC Control
+    0x40,  // AGCCTRL1      AGC Control
+    0x91,  // AGCCTRL0      AGC Control
+    0x80,  // WOREVT1       High Byte Event0 Timeout
+    0x00,  // WOREVT0       Low Byte Event0 Timeout
+    0xf0,  // WORCTRL       Wake On Radio Control
+    0x56,  // FREND1        Front End RX Configuration
+    0x11,  // FREND0        Front End TX Configuration
+    0xe9,  // FSCAL3        Frequency Synthesizer Calibration
+    0x2a,  // FSCAL2        Frequency Synthesizer Calibration
+    0x00,  // FSCAL1        Frequency Synthesizer Calibration
+    0x1f,  // FSCAL0        Frequency Synthesizer Calibration
+    0x59,  // FSTEST        Frequency Synthesizer Calibration Control
+    0x7f,  // PTEST         Production Test
+    0x3f,  // AGCTEST       AGC Test
+    0x88,  // TEST2         Various Test Settings
+    0x31,  // TEST1         Various Test Settings
+    0x09,  // TEST0         Various Test Settings
+};

@@ -16,6 +16,7 @@ static const char menu_str[]="\
  available commands:\r\n\r\n\
 \033[33;1m?\033[0m   - show menu\r\n\
 \033[33;1mrst\033[0m - POR\r\n\
+\033[33;1mdd\033[0m  - decode debug\r\n\
 \033[33;1mon\033[0m  - power on device L6\r\n\
 \033[33;1moff\033[0m - power off device L6\r\n";
 
@@ -65,6 +66,33 @@ void print_buf(uint8_t * data, const uint16_t size)
     }
 }
 
+void print_buf16(uint16_t * data, const uint16_t size)
+{
+    uint16_t bytes_remaining = size;
+    uint16_t bytes_to_be_printed, bytes_printed = 0;
+    char itoa_buf[CONV_BASE_10_BUF_SZ];
+    uint16_t i;
+
+    while (bytes_remaining > 0) {
+
+        if (bytes_remaining > 16) {
+            bytes_to_be_printed = 16;
+        } else {
+            bytes_to_be_printed = bytes_remaining;
+        }
+
+        for (i = 0; i < bytes_to_be_printed; i++) {
+            uart_print(&bc, _utoh16(itoa_buf, data[bytes_printed + i]));
+            uart_print(&bc, " ");
+        }
+
+        uart_print(&bc, "\r\n");
+        bytes_printed += bytes_to_be_printed;
+        bytes_remaining -= bytes_to_be_printed;
+    }
+}
+
+
 #define PARSER_CNT 16
 
 void parse_user_input(void)
@@ -99,6 +127,9 @@ void parse_user_input(void)
         test_transmit();
     } else if (strstr(input, "rst")) {
         HWREG8(PMM_BASE + OFS_PMMCTL0_L) |= PMMSWPOR;
+    } else if (strstr(input, "dd")) {
+        it_decode_debug();
+        it_cmd_rst();
     } else {
         //uart_tx_str("\r\n", 2);
     }

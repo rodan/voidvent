@@ -2,12 +2,16 @@
 #include <stdint.h>
 #include "sig.h"
 #include "proj.h"
+#include "intertechno.h"
+#include "timer0_a.h"
 #include "rf1a.h"
 #include "radio.h"
 
 uint8_t radio_rx_buffer[RADIO_RXBUF_SZ];
 volatile uint8_t radio_last_event = RADIO_NO_IRQ;
 uint8_t radio_state = RADIO_STATE_IDLE;
+
+uint16_t last_ccr = 0;
 
 uint8_t radio_get_event(void)
 {
@@ -36,8 +40,9 @@ void radio_parse_on(void)
     RF1AIES |= BIT1;
     RF1AIFG &= ~BIT1;           // Clear a pending interrupt
 
-    // enable timer0a
-
+    timer0_a_init();
+    it_decode_rst();
+    last_ccr = TA0R;
     RF1AIE |= BIT1;             // Enable the interrupt
 }
 
@@ -47,6 +52,7 @@ void radio_parse_off(void)
     RF1AIFG &= ~BIT1;           // Clear a pending interrupt
 
     // disable timer0a
+    timer0_a_halt();
 }
 
 void radio_tx_on(void)
@@ -103,8 +109,10 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
 #endif
 {
     uint8_t rx_sz;
+    uint8_t pol;
+    uint16_t cur_ccr;
 
-    sig3_on;
+    //sig3_on;
     switch (__even_in_range(RF1AIV, 32)) {
     case 0:                     // No RF core interrupt pending
         break;
@@ -113,20 +121,25 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
         break;
     case 4:                     // RFIFG1
         // irq based on GDO1 signal - programmable using IOCFG1 (0x01) register of radio core
+        cur_ccr = TA0R;
         if (RF1AIN & BIT1) {
             // high
             sig1_on;
+            pol = 0;
             // trigger on a falling edge next
             RF1AIES |= BIT1;
         } else {
             // low
             sig1_off;
+            pol = 1;
             // trigger on a rising edge next
             RF1AIES &= ~BIT1;
         }
-        // changing RF1IES can trigger a false interrupt flag (based on datasheet)
+        // changing RF1IES can trigger a false interrupt flag
         // so clear it preemptively
         RF1AIFG &= ~BIT1;
+        it_decode(cur_ccr - last_ccr, pol);
+        last_ccr = cur_ccr;
         break;
     case 6:                     // RFIFG2
         // irq based on GDO2 signal - programmable using IOCFG2 (0x00) register of radio core
@@ -173,6 +186,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
     case 26:                    // RFIFG12
         break;
     case 28:                    // RFIFG13
+        cur_ccr = TA0R;
         // Positive edge: Carrier sense. RSSI level is above threshold.
         // Negative edge: RSSI level is below threshold. (Equal to GDOx_CFG=14)
         sig2_switch; // page 675
@@ -182,20 +196,25 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
             // trigger on falling edge next
             RF1AIES |= BITD;
         } else {
+            // force decode the last command, 
+            // don't count on pol being (RF1AIN & BIT1)
+            it_decode(cur_ccr - last_ccr, 0);
+
             // signal lost, stop parsing
             radio_parse_off();
             // trigger on rising edge next
             RF1AIES &= ~BITD;
         }
-        // changing RF1IES can trigger a false interrupt flag (based on datasheet)
+        // changing RF1IES can trigger a false interrupt flag
         // so clear it preemptively
         RF1AIFG &= ~BITD;
+
         break;
     case 30:                    // RFIFG14
         break;
     case 32:                    // RFIFG15
         break;
     }
-    sig3_off;
+    //sig3_off;
     __bic_SR_register_on_exit(LPM3_bits);
 }
