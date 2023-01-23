@@ -54,7 +54,6 @@ void check_events(void)
         sch_rst_event_schedule(&sch);
     }
 
-
     eh_exec(msg);
 }
 
@@ -110,7 +109,7 @@ int main(void)
     ResetRadioCore();
     InitRadio();
 
-    it_rx_on();
+    //it_rx_on();
     radio_rx_on();
 
 #if defined (CONFIG_BUTTON)
@@ -163,7 +162,7 @@ int main(void)
 #endif
 
         if (radio_get_state() == RADIO_STATE_IDLE) {
-            it_rx_on();
+            //it_rx_on();
             radio_rx_on();
         }
     }

@@ -159,7 +159,7 @@ $(OBJ_DIR)/$(PROJ).dep: $(SRC)
 tags: $(PROJ_SRC) $(DRIVERLIB_SRC) $(GLUELIB_SRC) $(GLUELIB_HAL_SRC) $(LOCAL_SRC) $(OBJ_DIR)/$(PROJ).dep
 	@echo "Generating tags .."
 	@rm -f sed*
-	@exuberant-ctags --recurse=yes ./ $(DRIVERLIB) $(GLUELIB) $(GLUELIB_HAL) $(LDDIR).h $(shell cat $(OBJ_DIR)/$(PROJ).hdep)
+	exuberant-ctags --recurse=yes ./ $(DRIVERLIB) $(GLUELIB) $(GLUELIB_HAL) $(LDDIR).h $(shell cat $(OBJ_DIR)/$(PROJ).hdep)
 
 new_timestamps:
 	@$(BASH) $(REFLIB_ROOT)/tools/update_rtca_now.sh

@@ -29,11 +29,42 @@ void radio_set_state(const uint8_t state)
     radio_state = state;
 }
 
+void radio_parse_on(void)
+{
+    // set up an interrupt based on GDO1 signal which is setup in asynchronous serial mode
+    // we are most probably already on a high level, trigger on a falling edge first
+    RF1AIES |= BIT1;
+    RF1AIFG &= ~BIT1;           // Clear a pending interrupt
+
+    // enable timer0a
+
+    RF1AIE |= BIT1;             // Enable the interrupt
+}
+
+void radio_parse_off(void)
+{
+    RF1AIE &= ~BIT1;            // Enable the interrupt
+    RF1AIFG &= ~BIT1;           // Clear a pending interrupt
+
+    // disable timer0a
+}
+
+void radio_tx_on(void)
+{
+    // set an interrupt to trigger when the packet is fully sent
+    RF1AIES |= BIT9;
+    RF1AIFG &= ~BIT9;           // Clear pending interrupts
+    RF1AIE |= BIT9;             // Enable TX end-of-packet interrupt
+}
+
 void radio_rx_on(void)
 {
+#if CONFIG_RX_FIFO
+    // set up FIFO-based receive
     RF1AIES |= BIT9;            // Falling edge of RFIFG9
     RF1AIFG &= ~BIT9;           // Clear a pending interrupt
     RF1AIE |= BIT9;             // Enable the interrupt 
+#endif
 
     RF1AIFG &= ~BITD;           // Clear a pending interrupt
     RF1AIE |= BITD;             // Enable the interrupt 
@@ -47,6 +78,9 @@ void radio_rx_off(void)
 {
     RF1AIE &= ~BIT9;            // Disable RX interrupts
     RF1AIFG &= ~BIT9;           // Clear pending IFG
+
+    RF1AIE &= ~BIT1;            // Enable the interrupt
+    RF1AIFG &= ~BIT1;           // Clear a pending interrupt
 
     RF1AIE &= ~BITD;            // Disable RX interrupts
     RF1AIFG &= ~BITD;           // Clear pending IFG
@@ -72,27 +106,49 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
 
     sig3_on;
     switch (__even_in_range(RF1AIV, 32)) {
-    case 0:
-        break;                  // No RF core interrupt pending
-    case 2:
-        break;                  // RFIFG0
-    case 4:
-        break;                  // RFIFG1
-    case 6:
-        break;                  // RFIFG2
-    case 8:
-        break;                  // RFIFG3
-    case 10:
-        break;                  // RFIFG4
-    case 12:
-        break;                  // RFIFG5
-    case 14:
-        break;                  // RFIFG6
-    case 16:
-        break;                  // RFIFG7
-    case 18:
-        break;                  // RFIFG8
+    case 0:                     // No RF core interrupt pending
+        break;
+    case 2:                     // RFIFG0
+        // irq based on GDO0 signal - programmable using IOCFG0 (0x02) register of radio core
+        break;
+    case 4:                     // RFIFG1
+        // irq based on GDO1 signal - programmable using IOCFG1 (0x01) register of radio core
+        if (RF1AIN & BIT1) {
+            // high
+            sig1_on;
+            // trigger on a falling edge next
+            RF1AIES |= BIT1;
+        } else {
+            // low
+            sig1_off;
+            // trigger on a rising edge next
+            RF1AIES &= ~BIT1;
+        }
+        // changing RF1IES can trigger a false interrupt flag (based on datasheet)
+        // so clear it preemptively
+        RF1AIFG &= ~BIT1;
+        break;
+    case 6:                     // RFIFG2
+        // irq based on GDO2 signal - programmable using IOCFG2 (0x00) register of radio core
+        break;
+    case 8:                     // RFIFG3
+        break;
+    case 10:                    // RFIFG4
+        break;
+    case 12:                    // RFIFG5
+        break;
+    case 14:                    // RFIFG6
+        break;
+    case 16:                    // RFIFG7
+        break;
+    case 18:                    // RFIFG8
+        break;
     case 20:                    // RFIFG9
+        // Positive edge: Sync word sent or received.
+        // RFIFG9 Negative edge: End of packet or in RX when optional address check fails or RX FIFO overflows or in TX
+        // when TX FIFO underflows. (Equal to GDOx_CFG=6)
+
+        // in case of intertechno signals, the RX FIFO is not used, and the signal is parsed via RFIFG1
         if (radio_state == RADIO_STATE_TX) {
             RF1AIE &= ~BIT9;    // Disable TX end-of-packet interrupt
             radio_last_event = RADIO_TX_IRQ;
@@ -110,20 +166,35 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
             radio_state = RADIO_STATE_IDLE;
         }
         break;
-    case 22:
-        break;                  // RFIFG10
-    case 24:
-        break;                  // RFIFG11
-    case 26:
-        break;                  // RFIFG12
-    case 28:
-        // RSSI above threshold
+    case 22:                    // RFIFG10
+        break;
+    case 24:                    // RFIFG11
+        break;
+    case 26:                    // RFIFG12
+        break;
+    case 28:                    // RFIFG13
+        // Positive edge: Carrier sense. RSSI level is above threshold.
+        // Negative edge: RSSI level is below threshold. (Equal to GDOx_CFG=14)
         sig2_switch; // page 675
-        break;                  // RFIFG13
-    case 30:
-        break;                  // RFIFG14
-    case 32:
-        break;                  // RFIFG15
+        if (RF1AIN & BITD) {
+            // signal detected, start parsing
+            radio_parse_on();
+            // trigger on falling edge next
+            RF1AIES |= BITD;
+        } else {
+            // signal lost, stop parsing
+            radio_parse_off();
+            // trigger on rising edge next
+            RF1AIES &= ~BITD;
+        }
+        // changing RF1IES can trigger a false interrupt flag (based on datasheet)
+        // so clear it preemptively
+        RF1AIFG &= ~BITD;
+        break;
+    case 30:                    // RFIFG14
+        break;
+    case 32:                    // RFIFG15
+        break;
     }
     sig3_off;
     __bic_SR_register_on_exit(LPM3_bits);
