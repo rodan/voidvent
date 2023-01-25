@@ -18,9 +18,10 @@
 #define                 SYS_MSG_CC_RX  0x2   ///< tranceiver RX flag
 #define                 SYS_MSG_CC_TX  0x4   ///< transceiver TX has finished 
 #define             SYS_MSG_SCHEDULER  0x8   ///< scheduler has triggered
-#define           SYS_MSG_PARSE_TMOUT  0x10  ///< scheduled timeout of parsing
+#define                SYS_MSG_PWR_SM  0x10  ///< power management state machine
+#define         SYS_MSG_RF_DECODE_RDY  0x20  ///< result of the RF decoding is ready
 
-#define          SCHEDULE_PARSE_TMOUT  SCH_SLOT_0
+#define               SCHEDULE_PWR_SM  SCH_SLOT_0
 //#define                                SCH_SLOT_1
 //#define                                SCH_SLOT_2
 //#define                                SCH_SLOT_3

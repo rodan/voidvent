@@ -48,10 +48,15 @@ void check_events(void)
     }
     ev = sch_get_event_schedule(&sch);
     if (ev) {
-        if (ev & (1 << SCHEDULE_PARSE_TMOUT)) {
-            msg |= SYS_MSG_PARSE_TMOUT;
+        if (ev & (1 << SCHEDULE_PWR_SM)) {
+            msg |= SYS_MSG_PWR_SM;
         }
         sch_rst_event_schedule(&sch);
+    }
+    // intertechno decode status
+    if (it_get_event()) {
+        msg |= SYS_MSG_RF_DECODE_RDY;
+        it_rst_event();
     }
 
     eh_exec(msg);

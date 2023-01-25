@@ -41,7 +41,7 @@ void radio_parse_on(void)
     RF1AIFG &= ~BIT1;           // Clear a pending interrupt
 
     timer0_a_init();
-    it_decode_rst();
+    it_rst();
     last_ccr = TA0R;
     RF1AIE |= BIT1;             // Enable the interrupt
 }
@@ -65,6 +65,8 @@ void radio_tx_on(void)
 
 void radio_rx_on(void)
 {
+    // RX is done in asyncronous mode
+    WriteSingleReg(PKTCTRL0, 0x30);
 #if CONFIG_RX_FIFO
     // set up FIFO-based receive
     RF1AIES |= BIT9;            // Falling edge of RFIFG9
@@ -91,6 +93,9 @@ void radio_rx_off(void)
     RF1AIE &= ~BITD;            // Disable RX interrupts
     RF1AIFG &= ~BITD;           // Clear pending IFG
 
+    // back to non-async mode
+    WriteSingleReg(PKTCTRL0, 0x00);
+
     // It is possible that radio_rx_off is called while radio is receiving a packet.
     // Therefore, it is necessary to flush the RX FIFO after issuing IDLE strobe 
     // such that the RXFIFO is empty prior to receiving a packet.
@@ -112,7 +117,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
     uint8_t pol;
     uint16_t cur_ccr;
 
-    //sig3_on;
+    sig3_on;
     switch (__even_in_range(RF1AIV, 32)) {
     case 0:                     // No RF core interrupt pending
         break;
@@ -138,7 +143,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
         // changing RF1IES can trigger a false interrupt flag
         // so clear it preemptively
         RF1AIFG &= ~BIT1;
-        it_decode(cur_ccr - last_ccr, pol);
+        it_decode_any_proto(cur_ccr - last_ccr, pol);
         last_ccr = cur_ccr;
         break;
     case 6:                     // RFIFG2
@@ -189,7 +194,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
         cur_ccr = TA0R;
         // Positive edge: Carrier sense. RSSI level is above threshold.
         // Negative edge: RSSI level is below threshold. (Equal to GDOx_CFG=14)
-        sig2_switch; // page 675
+        //sig2_switch; // page 675
         if (RF1AIN & BITD) {
             // signal detected, start parsing
             radio_parse_on();
@@ -198,7 +203,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
         } else {
             // force decode the last command, 
             // don't count on pol being (RF1AIN & BIT1)
-            it_decode(cur_ccr - last_ccr, 0);
+            it_decode_any_proto(cur_ccr - last_ccr, 0);
 
             // signal lost, stop parsing
             radio_parse_off();
@@ -215,6 +220,6 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
     case 32:                    // RFIFG15
         break;
     }
-    //sig3_off;
+    sig3_off;
     __bic_SR_register_on_exit(LPM3_bits);
 }

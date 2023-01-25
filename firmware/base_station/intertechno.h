@@ -40,6 +40,18 @@
 #define   INTERTECHNO_SEQ_SIZE  16      // sequence buffer size to be allocated
 #define INTERTECHNO_SEQ_REPEAT  4       // how many times will the sequence be repeated
 
+#define          IT_EVENT_NULL  0
+#define    IT_EVENT_DECODE_RDY  1
+
+#define       IT_PROTO_UNKNOWN  0
+#define             IT_PROTO_V  1
+#define             IT_PROTO_F  2
+#define             RF_GARBAGE  4
+#define           IT_PROTO_ALL  (IT_PROTO_V | IT_PROTO_F)
+
+// 1 count = 4us
+
+// parameters for the variable-length protocol decoding
 #define           ITV_VARIANCE  24      // 96us
 #define         ITV_BLIP_TICKS  70      // 280us
 #define             ITV_SYNC_L  670     // 2680us
@@ -48,28 +60,51 @@
 
 #define           ITV_BLIP_MIN  (ITV_BLIP_TICKS - ITV_VARIANCE)
 #define           ITV_BLIP_MAX  (ITV_BLIP_TICKS + ITV_VARIANCE)
-
 #define         ITV_SYNC_L_MIN  (ITV_SYNC_L - ITV_VARIANCE)
 #define         ITV_SYNC_L_MAX  (ITV_SYNC_L + ITV_VARIANCE)
-
 #define       ITV_WORD_SEP_MIN  (ITV_WORD_SEP - ITV_VARIANCE)
 #define       ITV_WORD_SEP_MAX  (ITV_WORD_SEP + ITV_VARIANCE)
-
 #define        ITV_CMD_SEP_MIN  (ITV_CMD_SEP - ITV_VARIANCE)
-#define        ITV_CMD_SEP_MAX  (ITV_CMD_SEP + ITV_VARIANCE)
+
+// parameters for the fixed length protocol decoding
+#if defined(CONFIG_YCT_100)
+   #define        ITF_VARIANCE  23      // 92us
+   #define   ITF_1T_BLIP_TICKS  107     // 428us
+   #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
+   #define         ITF_CMD_SEP  3250    // 13000us
+#elif defined(CONFIG_ITS_100)
+   #define        ITF_VARIANCE  20      // 80us
+   #define   ITF_1T_BLIP_TICKS  90      // 361us
+   #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
+   #define         ITF_CMD_SEP  2750    // 11000us
+#else
+    // if we want both remotes to work use these mean values instead
+   #define        ITF_VARIANCE  32      // 128us
+   #define   ITF_1T_BLIP_TICKS  98      // 394us
+   #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
+   #define         ITF_CMD_SEP  2750    // 11000us
+#endif
+
+#define        ITF_1T_BLIP_MIN  (ITF_1T_BLIP_TICKS - ITF_VARIANCE)
+#define        ITF_1T_BLIP_MAX  (ITF_1T_BLIP_TICKS + ITF_VARIANCE)
+#define        ITF_3T_BLIP_MIN  (ITF_3T_BLIP_TICKS - (3 * ITF_VARIANCE))
+#define        ITF_3T_BLIP_MAX  (ITF_3T_BLIP_TICKS + (3 * ITF_VARIANCE))
+#define        ITF_CMD_SEP_MIN  (ITF_CMD_SEP - ITF_VARIANCE)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void it_handler_init(void);
+void it_rst(void);
 void it_tx_cmd(const uint8_t prefix, const uint8_t cmd);
 
-void it_decode_rst(void);
-void it_decode(const uint16_t interval, const uint8_t pol);
-void it_decode_debug(void);
+void it_decode_any_proto(const uint16_t interval, const uint8_t pol);
+void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol);
+void it_decode_variable_proto(const uint16_t interval, const uint8_t pol);
 
-void it_cmd_rst(void);
+uint8_t it_get_event(void);
+void it_rst_event(void);
 
 #ifdef __cplusplus
 }
