@@ -7,6 +7,7 @@
 #include "driverlib.h"
 #include "glue.h"
 #include "intertechno.h"
+#include "pwr_mgmt.h"
 #include "rf1a.h"
 #include "radio.h"
 #include "ui.h"
@@ -78,6 +79,11 @@ static void scheduler_irq(uint32_t msg)
     sch_handler(&sch);
 }
 
+static void power_mgmt_sm(uint32_t msg)
+{
+    pwr_mgmt_sm();
+}
+
 int main(void)
 {
     // stop watchdog
@@ -135,7 +141,9 @@ int main(void)
     eh_init();
     eh_register(&uart_bcl_rx_irq, SYS_MSG_UART_BCL_RX);
     eh_register(&scheduler_irq, SYS_MSG_SCHEDULER);
+    eh_register(&power_mgmt_sm, SYS_MSG_PWR_SM);
     it_handler_init();
+    pwr_mgmt_init();
     _BIS_SR(GIE);
 
     display_version();
@@ -145,7 +153,7 @@ int main(void)
 //#ifdef USE_SIG
         sig4_off;
 //#endif
-        _BIS_SR(LPM0_bits + GIE);
+        _BIS_SR(LPM3_bits + GIE);
 //#ifdef USE_SIG
         sig4_on;
 //#endif
