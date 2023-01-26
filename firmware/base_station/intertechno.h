@@ -72,15 +72,15 @@
    #define   ITF_1T_BLIP_TICKS  107     // 428us
    #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
    #define         ITF_CMD_SEP  3250    // 13000us
-#elif defined(CONFIG_ITS_100)
+#elif defined(CONFIG_ITS_150)
    #define        ITF_VARIANCE  20      // 80us
-   #define   ITF_1T_BLIP_TICKS  90      // 361us
+   #define   ITF_1T_BLIP_TICKS  90      // 360us
    #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
    #define         ITF_CMD_SEP  2750    // 11000us
 #else
-    // if we want both remotes to work use these mean values instead
-   #define        ITF_VARIANCE  32      // 128us
-   #define   ITF_1T_BLIP_TICKS  98      // 394us
+   // if we want both remotes to work use these mean values instead
+   #define        ITF_VARIANCE  40      // 160us
+   #define   ITF_1T_BLIP_TICKS  98      // 392us
    #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
    #define         ITF_CMD_SEP  2750    // 11000us
 #endif
@@ -90,6 +90,13 @@
 #define        ITF_3T_BLIP_MIN  (ITF_3T_BLIP_TICKS - (3 * ITF_VARIANCE))
 #define        ITF_3T_BLIP_MAX  (ITF_3T_BLIP_TICKS + (3 * ITF_VARIANCE))
 #define        ITF_CMD_SEP_MIN  (ITF_CMD_SEP - ITF_VARIANCE)
+
+// if the signal is low for at least these many ticks, then the scoring is reset
+// to allow both decoders to work on the next sequence
+#define IT_SCORING_RST_INTERVAL 2500    // 10000us
+
+// after these many scoring hits pick a decoder
+#define     IT_SCORING_TRG_LVL  20
 
 #ifdef __cplusplus
 extern "C" {

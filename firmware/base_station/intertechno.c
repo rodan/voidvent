@@ -76,7 +76,7 @@ void it_decode_any_proto(const uint16_t interval, const uint8_t pol)
         proto_sel = it_res.proto;
     }
 
-    if (it_res.score_t > 10) {
+    if (it_res.score_t > IT_SCORING_TRG_LVL) {
         if (it_res.score_v > it_res.score_f) {
             proto_sel = IT_PROTO_V;
             it_res.proto = IT_PROTO_V;
@@ -92,6 +92,13 @@ void it_decode_any_proto(const uint16_t interval, const uint8_t pol)
 
     if (proto_sel & IT_PROTO_V) {
         it_decode_variable_proto(interval, pol);
+    }
+
+    if ((interval > IT_SCORING_RST_INTERVAL) && (pol == 0)) {
+        it_res.proto = IT_PROTO_UNKNOWN;
+        it_res.score_t = 0;
+        it_res.score_v = 0;
+        it_res.score_f = 0;
     }
 }
 
@@ -113,11 +120,13 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
                 it_f.b[it_f.cnt] = 0x88;
             }
             it_f.h_cnt--;
+            sig2_on;
             it_res.score_f++;
             it_res.score_t++;
         } else if ((interval > ITF_3T_BLIP_MIN) && (interval < ITF_3T_BLIP_MAX)) {
             it_f.b[it_f.cnt] = 0x8e;
             it_f.h_cnt = 0;
+            sig2_on;
             it_res.score_f++;
             it_res.score_t++;
         } else {
@@ -127,17 +136,18 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
     } else {
         if ((interval > ITF_1T_BLIP_MIN) && (interval < ITF_1T_BLIP_MAX)) {
             it_f.h_cnt--;
+            sig2_on;
             it_res.score_f++;
             it_res.score_t++;
         } else if ((interval > ITF_3T_BLIP_MIN) && (interval < ITF_3T_BLIP_MAX)) {
             it_f.h_cnt-=3;
+            sig2_on;
             it_res.score_f++;
             it_res.score_t++;
         } else if (interval > ITF_CMD_SEP_MIN) {
-            sig3_switch;
             // command is done
             if ((it_f.cnt < 10) || (it_res.cnt > IT_RES_MAX_CNT - 1)) {
-                it_decoders_rst(IT_PROTO_F);
+                it_decoders_rst(IT_PROTO_ALL);
                 return;
             }
 
@@ -169,7 +179,7 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
 
             it_res.cnt++;
             it_last_event = IT_EVENT_DECODE_RDY;
-            it_decoders_rst(IT_PROTO_F);
+            it_decoders_rst(IT_PROTO_ALL);
         } else {
             it_res.score_f--;
             it_res.score_t++;
@@ -181,6 +191,7 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
         it_f.cnt++;
     }
 
+    sig2_off;
 }
 
 void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
@@ -199,6 +210,7 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
         if ((interval > ITV_BLIP_MIN) && (interval < ITV_BLIP_MAX)) {
             // count these
             it_v.w[it_v.cnt]++;
+            sig3_on;
             it_res.score_v++;
             it_res.score_t++;
         }
@@ -206,12 +218,14 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
         // could be a blip separator, low level sync seq or word separator
         if ((interval > ITV_BLIP_MIN) && (interval < ITV_BLIP_MAX)) {
             // we got a blip
+            sig3_on;
             it_res.score_v++;
             it_res.score_t++;
         } else if ((interval > ITV_SYNC_L_MIN) && (interval < ITV_SYNC_L_MAX)) {
             // we got a low level sync seq
             // a new command starts now
             it_decoders_rst(IT_PROTO_V);
+            sig3_on;
             it_res.score_v++;
             it_res.score_t++;
         } else if ((interval > ITV_WORD_SEP_MIN) && (interval < ITV_WORD_SEP_MAX)) {
@@ -221,18 +235,19 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
             } else {
                 it_decoders_rst(IT_PROTO_V);
             }
+            sig3_on;
             it_res.score_v++;
             it_res.score_t++;
         } else if (interval > ITV_CMD_SEP_MIN) {
             // command is done
             if ((it_v.cnt < 10) || (it_res.cnt > IT_RES_MAX_CNT - 1)) {
-                it_decoders_rst(IT_PROTO_V);
+                it_decoders_rst(IT_PROTO_ALL);
                 return;
             }
 
             if ((it_v.w[it_v.cnt - 9] != 2) || (it_v.w[it_v.cnt - 8] != 1) || (it_v.w[it_v.cnt - 7] != 3)
                 || (it_v.w[it_v.cnt - 6] != 2)) {
-                it_decoders_rst(IT_PROTO_V);
+                it_decoders_rst(IT_PROTO_ALL);
                 return;
             }
 
@@ -250,7 +265,7 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
                 cmd = 0;
                 break;
             default:
-                it_decoders_rst(IT_PROTO_V);
+                it_decoders_rst(IT_PROTO_ALL);
                 return;
             }
 
@@ -261,7 +276,7 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
                 } else if ((state == 0x12) || (state == 0x21)) {
                     multiplier = 3;
                 } else {
-                    it_decoders_rst(IT_PROTO_V);
+                    it_decoders_rst(IT_PROTO_ALL);
                     return;
                 }
                 break;
@@ -280,7 +295,7 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
                 multiplier = 3;
                 break;
             default:
-                it_decoders_rst(IT_PROTO_V);
+                it_decoders_rst(IT_PROTO_ALL);
                 return;
             }
 
@@ -298,16 +313,17 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
                 device = 4;
                 break;
             default:
-                it_decoders_rst(IT_PROTO_V);
+                it_decoders_rst(IT_PROTO_ALL);
                 return;
             }
 
             it_res.dec[it_res.cnt] = (cmd << 8) | (4 * multiplier + device);
             it_res.cnt++;
             it_last_event = IT_EVENT_DECODE_RDY;
-            it_decoders_rst(IT_PROTO_V);
+            it_decoders_rst(IT_PROTO_ALL);
         }
     }
+    sig3_off;
 }
 
 static uint8_t rotate_byte(uint8_t in)
