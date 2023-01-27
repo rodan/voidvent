@@ -5,6 +5,7 @@
 #include "glue.h"
 #include "proj.h"
 #include "sig.h"
+#include "pwr_mgmt.h"
 #include "rf1a.h"
 #include "radio.h"
 #include "ui.h"
@@ -120,13 +121,11 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
                 it_f.b[it_f.cnt] = 0x88;
             }
             it_f.h_cnt--;
-            sig2_on;
             it_res.score_f++;
             it_res.score_t++;
         } else if ((interval > ITF_3T_BLIP_MIN) && (interval < ITF_3T_BLIP_MAX)) {
             it_f.b[it_f.cnt] = 0x8e;
             it_f.h_cnt = 0;
-            sig2_on;
             it_res.score_f++;
             it_res.score_t++;
         } else {
@@ -136,12 +135,10 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
     } else {
         if ((interval > ITF_1T_BLIP_MIN) && (interval < ITF_1T_BLIP_MAX)) {
             it_f.h_cnt--;
-            sig2_on;
             it_res.score_f++;
             it_res.score_t++;
         } else if ((interval > ITF_3T_BLIP_MIN) && (interval < ITF_3T_BLIP_MAX)) {
             it_f.h_cnt-=3;
-            sig2_on;
             it_res.score_f++;
             it_res.score_t++;
         } else if (interval > ITF_CMD_SEP_MIN) {
@@ -191,7 +188,6 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
         it_f.cnt++;
     }
 
-    sig2_off;
 }
 
 void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
@@ -210,7 +206,6 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
         if ((interval > ITV_BLIP_MIN) && (interval < ITV_BLIP_MAX)) {
             // count these
             it_v.w[it_v.cnt]++;
-            sig3_on;
             it_res.score_v++;
             it_res.score_t++;
         }
@@ -218,14 +213,12 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
         // could be a blip separator, low level sync seq or word separator
         if ((interval > ITV_BLIP_MIN) && (interval < ITV_BLIP_MAX)) {
             // we got a blip
-            sig3_on;
             it_res.score_v++;
             it_res.score_t++;
         } else if ((interval > ITV_SYNC_L_MIN) && (interval < ITV_SYNC_L_MAX)) {
             // we got a low level sync seq
             // a new command starts now
             it_decoders_rst(IT_PROTO_V);
-            sig3_on;
             it_res.score_v++;
             it_res.score_t++;
         } else if ((interval > ITV_WORD_SEP_MIN) && (interval < ITV_WORD_SEP_MAX)) {
@@ -235,7 +228,6 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
             } else {
                 it_decoders_rst(IT_PROTO_V);
             }
-            sig3_on;
             it_res.score_v++;
             it_res.score_t++;
         } else if (interval > ITV_CMD_SEP_MIN) {
@@ -323,7 +315,6 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
             it_decoders_rst(IT_PROTO_ALL);
         }
     }
-    sig3_off;
 }
 
 static uint8_t rotate_byte(uint8_t in)
@@ -374,11 +365,12 @@ void it_tx_cmd(const uint8_t prefix, const uint8_t cmd)
     it_buff[p++] = 0;
     it_buff[p] = 0;
 
+    pwr_mgmt_extend(100);
+
     if (radio_get_state() == RADIO_STATE_RX) {
         radio_rx_off();
     }
     WriteSingleReg(PKTLEN, INTERTECHNO_SEQ_SIZE * INTERTECHNO_SEQ_REPEAT);
-    Strobe(RF_SCAL);            // re-calibrate radio
 
     radio_tx_on();
 
@@ -394,7 +386,7 @@ static void it_tx_handler(uint32_t msg)
 {
     Strobe(RF_SIDLE);           // IDLE
     Strobe(RF_SFTX);            // flush TXFIFO
-    //Strobe(RF_SPWD);            // power-down mode
+    Strobe(RF_SPWD);            // power-down mode
 }
 
 static void it_rx_handler(uint32_t msg)

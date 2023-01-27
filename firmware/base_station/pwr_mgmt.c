@@ -3,6 +3,7 @@
 #include "glue.h"
 #include "sig.h"
 #include "proj.h"
+#include "radio.h"
 #include "pwr_mgmt.h"
 
 uint8_t pm_state = PWR_MGMT_IDLE;
@@ -13,32 +14,27 @@ void pwr_mgmt_sm(void)
 
     switch (pm_state) {
         case PWR_MGMT_IDLE:
-            sig2_switch;
-            sch_set_trigger_slot(&sch, SCHEDULE_PWR_SM, systime(&sch) + 12, SCH_EVENT_ENABLE);
+            sig2_off;
+            sch_set_trigger_slot(&sch, SCHEDULE_PWR_SM, systime(&sch) + 20, SCH_EVENT_ENABLE);
             pm_state = PWR_MGMT_RADIO_ON;
+            radio_rx_off();
+            radio_sleep_en();
             break;
         case PWR_MGMT_RADIO_ON:
-            sig2_switch;
-            sch_set_trigger_slot(&sch, SCHEDULE_PWR_SM, systime(&sch) + 2, SCH_EVENT_ENABLE);
-            pm_state = PWR_MGMT_RF_RDY_TMOUT;
-            break;
-        case PWR_MGMT_RF_RDY_TMOUT:
-            sig2_switch;
-            sch_set_trigger_slot(&sch, SCHEDULE_PWR_SM, systime(&sch) + 4, SCH_EVENT_ENABLE);
+            sig2_on;
+            sch_set_trigger_slot(&sch, SCHEDULE_PWR_SM, systime(&sch) + 1, SCH_EVENT_ENABLE);
             pm_state = PWR_MGMT_IDLE;
-            break;
-        case PWR_MGMT_RSSI_H_TMOUT:
-            break;
-        case PWR_MGMT_DECODE_TMOUT:
-            break;
-        case PWR_MGMT_TX_TMOUT:
-            break;
-        case PWR_MGMT_RADIO_OFF:
+            radio_rx_on();
             break;
         default:
             pm_state = PWR_MGMT_IDLE;
             break;
     }
+}
+
+void pwr_mgmt_extend(const uint8_t ticks)
+{
+    sch_set_trigger_slot(&sch, SCHEDULE_PWR_SM, systime(&sch) + ticks, SCH_EVENT_ENABLE);
 }
 
 void pwr_mgmt_init(void)

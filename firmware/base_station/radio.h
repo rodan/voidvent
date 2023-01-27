@@ -54,6 +54,7 @@ void radio_rst_event(void);
 void radio_rx_on(void);
 void radio_rx_off(void);
 void radio_tx_on(void);
+void radio_sleep_en(void);
 
 uint8_t radio_get_state(void);
 void radio_set_state(const uint8_t state);

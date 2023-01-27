@@ -7,7 +7,6 @@
 #include "radio.h"
 #include "rf1a.h"
 #include "version.h"
-#include "test.h"
 #include "ui.h"
 
 extern uart_descriptor bc;
@@ -122,8 +121,6 @@ void parse_user_input(void)
         it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_ON);
     } else if (strstr(input, "off")) {
         it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_OFF);
-    } else if (strstr(input, "test")) {
-        test_transmit();
     } else if (strstr(input, "rst")) {
         HWREG8(PMM_BASE + OFS_PMMCTL0_L) |= PMMSWPOR;
     } else {

@@ -11,7 +11,6 @@
 #include "rf1a.h"
 #include "radio.h"
 #include "ui.h"
-#include "test.h"
 #include "sig.h"
 
 uart_descriptor bc; ///< backchannel uart interface
@@ -67,11 +66,10 @@ void init_button(void)
 {
     // Set up the button as interruptible 
     P1DIR &= ~BIT1;
-    P1REN |= BIT1;
     P1IES &= ~BIT1;
     P1IFG = 0;
     P1OUT |= BIT1;
-    P1IE |= BIT1;
+    //P1IE |= BIT1;
 }
 
 static void scheduler_irq(uint32_t msg)
@@ -89,16 +87,11 @@ int main(void)
     // stop watchdog
     WDTCTL = WDTPW | WDTHOLD;
     msp430_hal_init(HAL_GPIO_DIR_OUTPUT | HAL_GPIO_OUT_LOW);
-#ifdef USE_SIG
-    //sig0_on;
-#endif
 
     // enable GDO0
     P1SEL |= BIT0;
     // enable GDO1
     P3SEL |= BIT6;
-    // enable GDO2
-    P1SEL |= BIT1;
 
     PMM_setVCore(2);
     clock_pin_init();
@@ -120,22 +113,16 @@ int main(void)
     ResetRadioCore();
     InitRadio();
 
-    radio_rx_on();
-
-#if defined (CONFIG_BUTTON)
     init_button();
     // enable button irq
-    P1IFG = 0;
-    P1IE |= BIT1;
-#endif
+    //P1IFG = 0;
+    //P1IE |= BIT1;
 
 #ifdef USE_SIG
-    //sig0_off;
     sig1_off;
     sig2_off;
     sig3_off;
     sig4_off;
-    //sig5_off;
 #endif
 
     eh_init();
@@ -164,18 +151,6 @@ int main(void)
         check_events();
         check_events();
         check_events();
-
-#if 0
-        if (port1_last_event) {
-            port1_last_event = 0;
-            test_transmit();
-            P1IE |= BIT1;
-        }
-#endif
-
-        if (radio_get_state() == RADIO_STATE_IDLE) {
-            radio_rx_on();
-        }
     }
 
 }

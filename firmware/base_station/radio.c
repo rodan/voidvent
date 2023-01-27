@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "sig.h"
 #include "proj.h"
+#include "pwr_mgmt.h"
 #include "intertechno.h"
 #include "timer0_a.h"
 #include "rf1a.h"
@@ -74,6 +75,8 @@ void radio_rx_on(void)
     RF1AIE |= BIT9;             // Enable the interrupt 
 #endif
 
+    // trigger on rising edge
+    RF1AIES &= ~BITD;
     RF1AIFG &= ~BITD;           // Clear a pending interrupt
     RF1AIE |= BITD;             // Enable the interrupt 
 
@@ -102,6 +105,11 @@ void radio_rx_off(void)
     Strobe(RF_SIDLE);
     Strobe(RF_SFRX);
     radio_state = RADIO_STATE_IDLE;
+}
+
+void radio_sleep_en(void)
+{
+    Strobe(RF_SPWD);
 }
 
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
@@ -196,6 +204,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
         //sig2_switch; // page 675
         if (RF1AIN & BITD) {
             // signal detected, start parsing
+            pwr_mgmt_extend(40);
             radio_parse_on();
             // trigger on falling edge next
             RF1AIES |= BITD;
