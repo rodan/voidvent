@@ -1,5 +1,18 @@
 
-               | remote control unique? serial number                | on/off | device |
+file extension  | open with
+
+*.sr, *.pvs         pulseview
+*.complex16s        urh (universal radio hacker)
+
+
+intertechno 'variable clock' protocol decode
+
+a '0' bit is defined by a short low-level blip
+a '1' bit is defined by a long low-level blip
+
+binary representation of the captured signals:
+
+filename       | remote control unique? serial number                | on/off | device |
 itls16_0_0      10010101 10101010 01010110 10011001 01011001 01010101 10010110 01010101
 itls16_0_1      10010101 10101010 01010110 10011001 01011001 01010101 10010101 01010101
 itls16_1_0      10010101 10101010 01010110 10011001 01011001 01010101 10010110 01010110
@@ -40,4 +53,32 @@ device id positions
 1  5  9 13
 2  6 10 14
 3  7 11 15
+
+
+
+intertechno 'fixed/constant clock' protocol decode:
+
+a '0' bit is defined by a 0x8e byte
+a '1' bit is defined by a 0x88 byte
+end-of-command is defined by 0x80
+
+| family (R)| device (R) | on/off
+ 8e 8e 88 8e 8e 88 8e 88  88 8e 8e 8e 80
+ 1  1  0  1   1  0  1  0   0  1  1  1  eoc
+
+a bit rotation needs to be performed on the family/device byte:
+
+h g f e d c b a -> (via rotation)
+e f g h a b c d
+
+| family    | device
+ 1  1  0  1   1  0  1  0   0xda becomes after bit rotation:
+ 1  0  1  1   0  1  0  1   0xb5
+
+family 11 (decimal)
+device 5  (decimal)
+
+'ON'  is 0111b
+'OFF' is 0110b
+
 
