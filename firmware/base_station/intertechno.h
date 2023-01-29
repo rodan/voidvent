@@ -53,42 +53,42 @@
 
 // parameters for the variable-length protocol decoding
 #define           ITV_VARIANCE  24      // 96us
-#define         ITV_BLIP_TICKS  70      // 280us
+#define               ITV_BLIP  70      // 280us
 #define             ITV_SYNC_L  670     // 2680us
-#define           ITV_WORD_SEP  325     // 1300us
+#define             ITV_L_BLIP  325     // 1300us
 #define            ITV_CMD_SEP  2600    // 10400us
 
-#define           ITV_BLIP_MIN  (ITV_BLIP_TICKS - ITV_VARIANCE)
-#define           ITV_BLIP_MAX  (ITV_BLIP_TICKS + ITV_VARIANCE)
+#define           ITV_BLIP_MIN  (ITV_BLIP - ITV_VARIANCE)
+#define           ITV_BLIP_MAX  (ITV_BLIP + ITV_VARIANCE)
 #define         ITV_SYNC_L_MIN  (ITV_SYNC_L - ITV_VARIANCE)
 #define         ITV_SYNC_L_MAX  (ITV_SYNC_L + ITV_VARIANCE)
-#define       ITV_WORD_SEP_MIN  (ITV_WORD_SEP - ITV_VARIANCE)
-#define       ITV_WORD_SEP_MAX  (ITV_WORD_SEP + ITV_VARIANCE)
+#define         ITV_L_BLIP_MIN  (ITV_L_BLIP - ITV_VARIANCE)
+#define         ITV_L_BLIP_MAX  (ITV_L_BLIP + ITV_VARIANCE)
 #define        ITV_CMD_SEP_MIN  (ITV_CMD_SEP - ITV_VARIANCE)
 
 // parameters for the fixed length protocol decoding
 #if defined(CONFIG_YCT_100)
    #define        ITF_VARIANCE  23      // 92us
-   #define   ITF_1T_BLIP_TICKS  107     // 428us
-   #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
+   #define         ITF_1T_BLIP  107     // 428us
+   #define         ITF_3T_BLIP  (3 * ITF_1T_BLIP)
    #define         ITF_CMD_SEP  3250    // 13000us
 #elif defined(CONFIG_ITS_150)
    #define        ITF_VARIANCE  20      // 80us
-   #define   ITF_1T_BLIP_TICKS  90      // 360us
-   #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
+   #define         ITF_1T_BLIP  90      // 360us
+   #define         ITF_3T_BLIP  (3 * ITF_1T_BLIP)
    #define         ITF_CMD_SEP  2750    // 11000us
 #else
    // if we want both remotes to work use these mean values instead
    #define        ITF_VARIANCE  40      // 160us
-   #define   ITF_1T_BLIP_TICKS  98      // 392us
-   #define   ITF_3T_BLIP_TICKS  (3 * ITF_1T_BLIP_TICKS)
+   #define         ITF_1T_BLIP  98      // 392us
+   #define         ITF_3T_BLIP  (3 * ITF_1T_BLIP)
    #define         ITF_CMD_SEP  2750    // 11000us
 #endif
 
-#define        ITF_1T_BLIP_MIN  (ITF_1T_BLIP_TICKS - ITF_VARIANCE)
-#define        ITF_1T_BLIP_MAX  (ITF_1T_BLIP_TICKS + ITF_VARIANCE)
-#define        ITF_3T_BLIP_MIN  (ITF_3T_BLIP_TICKS - (3 * ITF_VARIANCE))
-#define        ITF_3T_BLIP_MAX  (ITF_3T_BLIP_TICKS + (3 * ITF_VARIANCE))
+#define        ITF_1T_BLIP_MIN  (ITF_1T_BLIP - ITF_VARIANCE)
+#define        ITF_1T_BLIP_MAX  (ITF_1T_BLIP + ITF_VARIANCE)
+#define        ITF_3T_BLIP_MIN  (ITF_3T_BLIP - (3 * ITF_VARIANCE))
+#define        ITF_3T_BLIP_MAX  (ITF_3T_BLIP + (3 * ITF_VARIANCE))
 #define        ITF_CMD_SEP_MIN  (ITF_CMD_SEP - ITF_VARIANCE)
 
 // if the signal is low for at least these many ticks, then the scoring is reset

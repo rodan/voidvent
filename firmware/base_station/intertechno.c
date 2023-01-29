@@ -12,11 +12,12 @@
 #include "intertechno.h"
 
 static uint8_t rotate_byte(uint8_t in);
+uint8_t manchester_decode(const uint8_t in, uint8_t *out);
 
 extern const RF_SETTINGS rfSettings;
 extern uint8_t radio_rx_buffer[RADIO_RXBUF_SZ];
 
-#define     ITV_SIG_SZ  33
+#define     ITV_SIG_SZ  8
 #define     ITF_SIG_SZ  13
 #define IT_RES_MAX_CNT  3
 
@@ -30,14 +31,15 @@ typedef struct {
 } it_result;
 
 typedef struct {
-    uint8_t w[ITV_SIG_SZ];          ///< decoded message
-    uint8_t cnt;                    ///< number of elements decoded
+    uint8_t b[ITV_SIG_SZ];          ///< decoded message
+    uint8_t cnt;                    ///< number of bytes decoded
+    int8_t s;                       ///< shift of current bit in current byte
 } it_variable_proto_decoder;
 
 typedef struct {
     uint8_t b[ITF_SIG_SZ];          ///< decoded message
     uint8_t cnt;                    ///< number of elements decoded
-    int8_t h_cnt;
+    int8_t s;                       ///< shift of current bit in current byte
 } it_fixed_proto_decoder;
 
 it_result it_res;
@@ -50,11 +52,12 @@ void it_decoders_rst(const uint8_t flag)
 {
     if (flag & IT_PROTO_V) {
         memset(&it_v, 0, sizeof(it_v));
+        it_v.s = 7;
     }
 
     if (flag & IT_PROTO_F) {
         memset(&it_f, 0, sizeof(it_f));
-        it_f.h_cnt = 7;
+        it_f.s = 7;
     }
 }
 
@@ -115,17 +118,17 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
 
     if (pol) {
         if ((interval > ITF_1T_BLIP_MIN) && (interval < ITF_1T_BLIP_MAX)) {
-            if (it_f.h_cnt == 7) {
+            if (it_f.s == 7) {
                 it_f.b[it_f.cnt] = 0x80;
             } else {
                 it_f.b[it_f.cnt] = 0x88;
             }
-            it_f.h_cnt--;
+            it_f.s--;
             it_res.score_f++;
             it_res.score_t++;
         } else if ((interval > ITF_3T_BLIP_MIN) && (interval < ITF_3T_BLIP_MAX)) {
             it_f.b[it_f.cnt] = 0x8e;
-            it_f.h_cnt = 0;
+            it_f.s = 0;
             it_res.score_f++;
             it_res.score_t++;
         } else {
@@ -134,11 +137,11 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
         }
     } else {
         if ((interval > ITF_1T_BLIP_MIN) && (interval < ITF_1T_BLIP_MAX)) {
-            it_f.h_cnt--;
+            it_f.s--;
             it_res.score_f++;
             it_res.score_t++;
         } else if ((interval > ITF_3T_BLIP_MIN) && (interval < ITF_3T_BLIP_MAX)) {
-            it_f.h_cnt-=3;
+            it_f.s-=3;
             it_res.score_f++;
             it_res.score_t++;
         } else if (interval > ITF_CMD_SEP_MIN) {
@@ -162,7 +165,6 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
                 }
             }
 
-
             switch (cmd) {
                 case INTERTECHNO_CMD_ON:
                     it_res.dec[it_res.cnt] |= 0xff00;
@@ -170,7 +172,8 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
                 case INTERTECHNO_CMD_OFF:
                     break;
                 default:
-                    it_res.dec[it_res.cnt] |= 0xee00;
+                    it_decoders_rst(IT_PROTO_ALL);
+                    return;
                     break;
             }
 
@@ -183,18 +186,15 @@ void it_decode_fixed_proto(const uint16_t interval, const uint8_t pol)
         }
     }
 
-    if (it_f.h_cnt < 1) {
-        it_f.h_cnt = 7;
+    if (it_f.s < 1) {
+        it_f.s = 7;
         it_f.cnt++;
     }
-
 }
 
 void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
 {
-    uint8_t state;
-    uint8_t multiplier;
-    uint8_t device;
+    uint8_t dev;
     uint8_t cmd;
 
     if (it_v.cnt > ITV_SIG_SZ) {
@@ -202,119 +202,97 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
     }
 
     if (pol) {
-        // could be a high level blip
         if ((interval > ITV_BLIP_MIN) && (interval < ITV_BLIP_MAX)) {
-            // count these
-            it_v.w[it_v.cnt]++;
             it_res.score_v++;
             it_res.score_t++;
+        } else {
+            it_res.score_v--;
+            it_res.score_t++;
         }
+
     } else {
-        // could be a blip separator, low level sync seq or word separator
         if ((interval > ITV_BLIP_MIN) && (interval < ITV_BLIP_MAX)) {
-            // we got a blip
+            // logic zero
+            it_v.s--;
             it_res.score_v++;
             it_res.score_t++;
         } else if ((interval > ITV_SYNC_L_MIN) && (interval < ITV_SYNC_L_MAX)) {
-            // we got a low level sync seq
-            // a new command starts now
+            // we got a low level sync, a new command starts now
             it_decoders_rst(IT_PROTO_V);
             it_res.score_v++;
             it_res.score_t++;
-        } else if ((interval > ITV_WORD_SEP_MIN) && (interval < ITV_WORD_SEP_MAX)) {
-            // word is done
-            if (it_v.cnt < ITV_SIG_SZ) {
-                it_v.cnt++;
-            } else {
-                it_decoders_rst(IT_PROTO_V);
-            }
+        } else if ((interval >  ITV_L_BLIP_MIN) && (interval <  ITV_L_BLIP_MAX)) {
+            // logic one
+            it_v.b[it_v.cnt] |= 1 << it_v.s;
+            it_v.s--;
             it_res.score_v++;
             it_res.score_t++;
         } else if (interval > ITV_CMD_SEP_MIN) {
-            // command is done
-            if ((it_v.cnt < 10) || (it_res.cnt > IT_RES_MAX_CNT - 1)) {
+            // command is done. report result only if there are zero inconsistencies
+            if ((it_v.cnt < 7) || (it_res.cnt > IT_RES_MAX_CNT - 1)) {
+                it_decoders_rst(IT_PROTO_ALL);
+                return;
+            }
+            if (manchester_decode(it_v.b[7], &dev) == EXIT_FAILURE) {
                 it_decoders_rst(IT_PROTO_ALL);
                 return;
             }
 
-            if ((it_v.w[it_v.cnt - 9] != 2) || (it_v.w[it_v.cnt - 8] != 1) || (it_v.w[it_v.cnt - 7] != 3)
-                || (it_v.w[it_v.cnt - 6] != 2)) {
-                it_decoders_rst(IT_PROTO_ALL);
-                return;
-            }
-
-            state = (it_v.w[it_v.cnt - 5] << 4) | it_v.w[it_v.cnt - 4];
-            multiplier = (it_v.w[it_v.cnt - 3] << 4) | it_v.w[it_v.cnt - 2];
-            device = (it_v.w[it_v.cnt - 1] << 4) | it_v.w[it_v.cnt];
-
-            switch (state) {
-            case 0x13:
-            case 0x12:
+            // don't bother using manchester_decode() on the command byte
+            // it's much quicker to compare the expected result with our input
+            cmd = it_v.b[6] & 0x0f;
+            if (cmd == 0x6) {
+                cmd = 0x00;
+            } else if (cmd == 0x5) {
                 cmd = 0xff;
-                break;
-            case 0x22:
-            case 0x21:
-                cmd = 0;
-                break;
-            default:
+            } else {
                 it_decoders_rst(IT_PROTO_ALL);
                 return;
             }
 
-            switch (multiplier) {
-            case 0x22:
-                if ((state == 0x13) || (state == 0x22)) {
-                    multiplier = 0;
-                } else if ((state == 0x12) || (state == 0x21)) {
-                    multiplier = 3;
-                } else {
-                    it_decoders_rst(IT_PROTO_ALL);
-                    return;
-                }
-                break;
-            case 0x21:
-                multiplier = 0;
-                break;
-            case 0x13:
-            case 0x12:
-                multiplier = 1;
-                break;
-            case 0x32:
-            case 0x31:
-                multiplier = 2;
-                break;
-            case 0x23:
-                multiplier = 3;
-                break;
-            default:
-                it_decoders_rst(IT_PROTO_ALL);
-                return;
-            }
-
-            switch (device) {
-            case 0x21:
-                device = 1;
-                break;
-            case 0x12:
-                device = 2;
-                break;
-            case 0x31:
-                device = 3;
-                break;
-            case 0x22:
-                device = 4;
-                break;
-            default:
-                it_decoders_rst(IT_PROTO_ALL);
-                return;
-            }
-
-            it_res.dec[it_res.cnt] = (cmd << 8) | (4 * multiplier + device);
+            it_res.dec[it_res.cnt] = (cmd << 8) | dev;
             it_res.cnt++;
             it_last_event = IT_EVENT_DECODE_RDY;
             it_decoders_rst(IT_PROTO_ALL);
+        } else {
+            it_res.score_v--;
+            it_res.score_t++;
         }
     }
+
+    if (it_v.s < 0) {
+        it_v.s = 7;
+        it_v.cnt++;
+    }
+}
+
+uint8_t manchester_decode(const uint8_t in, uint8_t *out)
+{
+    uint8_t i;
+    uint16_t couple;
+    uint8_t errors = 0;
+
+    *out = 0;
+    for (i = 0; i < 4; i++) {
+        couple = (in >> i*2) & 0x3;
+
+        switch (couple) {
+            case 1:
+                break;
+            case 2:
+                *out |= 1 << i;
+                break;
+            case 0:
+            case 3:
+                errors = 1;
+                break;
+        }
+    }
+
+    if (errors) {
+        return(EXIT_FAILURE);
+    }
+    return(EXIT_SUCCESS);
 }
 
 static uint8_t rotate_byte(uint8_t in)

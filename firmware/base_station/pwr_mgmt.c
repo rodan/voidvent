@@ -14,14 +14,12 @@ void pwr_mgmt_sm(void)
 
     switch (pm_state) {
         case PWR_MGMT_IDLE:
-            sig2_off;
             sch_set_trigger_slot(&sch, SCHEDULE_PWR_SM, systime(&sch) + 20, SCH_EVENT_ENABLE);
             pm_state = PWR_MGMT_RADIO_ON;
             radio_rx_off();
             radio_sleep_en();
             break;
         case PWR_MGMT_RADIO_ON:
-            sig2_on;
             sch_set_trigger_slot(&sch, SCHEDULE_PWR_SM, systime(&sch) + 1, SCH_EVENT_ENABLE);
             pm_state = PWR_MGMT_IDLE;
             radio_rx_on();
