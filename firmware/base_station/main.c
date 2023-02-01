@@ -14,7 +14,6 @@
 #include "sig.h"
 
 uart_descriptor bc; ///< backchannel uart interface
-sch_descriptor sch; ///< scheduler structure
 volatile uint8_t port1_last_event = 0;
 
 static void uart_bcl_rx_irq(uint32_t msg)
@@ -42,16 +41,16 @@ void check_events(void)
         radio_rst_event();
     }
     // scheduler
-    if (sch_get_event(&sch)) {
+    if (sch_get_event()) {
         msg |= SYS_MSG_SCHEDULER;
-        sch_rst_event(&sch);
+        sch_rst_event();
     }
-    ev = sch_get_event_schedule(&sch);
+    ev = sch_get_event_schedule();
     if (ev) {
         if (ev & (1 << SCHEDULE_PWR_SM)) {
             msg |= SYS_MSG_PWR_SM;
         }
-        sch_rst_event_schedule(&sch);
+        sch_rst_event_schedule();
     }
     // intertechno decode status
     if (it_get_event()) {
@@ -74,7 +73,7 @@ void init_button(void)
 
 static void scheduler_irq(uint32_t msg)
 {
-    sch_handler(&sch);
+    sch_handler();
 }
 
 static void power_mgmt_sm(uint32_t msg)
@@ -107,8 +106,7 @@ int main(void)
     uart_set_rx_irq_handler(&bc, uart_rx_simple_handler);
 #endif
 
-    sch.baseAddress = TIMER_A1_BASE;
-    sch_init(&sch);
+    sch_init();
 
     ResetRadioCore();
     InitRadio();

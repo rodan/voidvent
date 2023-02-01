@@ -204,7 +204,8 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
         //sig2_switch; // page 675
         if (RF1AIN & BITD) {
             // signal detected, start parsing
-            pwr_mgmt_extend(40);
+            // pwr_mgmt_extend(40); // FIXME set back to 40
+            pwr_mgmt_extend(100);
             radio_parse_on();
             // trigger on falling edge next
             RF1AIES |= BITD;

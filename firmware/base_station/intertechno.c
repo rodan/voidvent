@@ -31,14 +31,14 @@ typedef struct {
 } it_result;
 
 typedef struct {
-    uint8_t b[ITV_SIG_SZ];          ///< decoded message
-    uint8_t cnt;                    ///< number of bytes decoded
+    uint8_t b[ITV_SIG_SZ];          ///< received message
+    uint8_t cnt;                    ///< number of bytes received
     int8_t s;                       ///< shift of current bit in current byte
 } it_variable_proto_decoder;
 
 typedef struct {
-    uint8_t b[ITF_SIG_SZ];          ///< decoded message
-    uint8_t cnt;                    ///< number of elements decoded
+    uint8_t b[ITF_SIG_SZ];          ///< received message
+    uint8_t cnt;                    ///< number of bytes received
     int8_t s;                       ///< shift of current bit in current byte
 } it_fixed_proto_decoder;
 
@@ -46,7 +46,7 @@ it_result it_res;
 it_variable_proto_decoder it_v;
 it_fixed_proto_decoder it_f;
 
-uint8_t it_last_event = 0;
+uint8_t it_last_event = IT_EVENT_NULL;
 
 void it_decoders_rst(const uint8_t flag)
 {
@@ -202,7 +202,7 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
     }
 
     if (pol) {
-        if ((interval > ITV_BLIP_MIN) && (interval < ITV_BLIP_MAX)) {
+        if ((interval > ITV_L0_MIN) && (interval < ITV_L0_MAX)) {
             it_res.score_v++;
             it_res.score_t++;
         } else {
@@ -211,17 +211,17 @@ void it_decode_variable_proto(const uint16_t interval, const uint8_t pol)
         }
 
     } else {
-        if ((interval > ITV_BLIP_MIN) && (interval < ITV_BLIP_MAX)) {
+        if ((interval > ITV_L0_MIN) && (interval < ITV_L0_MAX)) {
             // logic zero
             it_v.s--;
             it_res.score_v++;
             it_res.score_t++;
-        } else if ((interval > ITV_SYNC_L_MIN) && (interval < ITV_SYNC_L_MAX)) {
+        } else if ((interval > ITV_SYNC_MIN) && (interval < ITV_SYNC_MAX)) {
             // we got a low level sync, a new command starts now
             it_decoders_rst(IT_PROTO_V);
             it_res.score_v++;
             it_res.score_t++;
-        } else if ((interval >  ITV_L_BLIP_MIN) && (interval <  ITV_L_BLIP_MAX)) {
+        } else if ((interval >  ITV_L1_MIN) && (interval <  ITV_L1_MAX)) {
             // logic one
             it_v.b[it_v.cnt] |= 1 << it_v.s;
             it_v.s--;

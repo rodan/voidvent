@@ -53,17 +53,17 @@
 
 // parameters for the variable-length protocol decoding
 #define           ITV_VARIANCE  24      // 96us
-#define               ITV_BLIP  70      // 280us
-#define             ITV_SYNC_L  670     // 2680us
-#define             ITV_L_BLIP  325     // 1300us
+#define                 ITV_L0  70      // 280us
+#define               ITV_SYNC  670     // 2680us
+#define                 ITV_L1  325     // 1300us
 #define            ITV_CMD_SEP  2600    // 10400us
 
-#define           ITV_BLIP_MIN  (ITV_BLIP - ITV_VARIANCE)
-#define           ITV_BLIP_MAX  (ITV_BLIP + ITV_VARIANCE)
-#define         ITV_SYNC_L_MIN  (ITV_SYNC_L - ITV_VARIANCE)
-#define         ITV_SYNC_L_MAX  (ITV_SYNC_L + ITV_VARIANCE)
-#define         ITV_L_BLIP_MIN  (ITV_L_BLIP - ITV_VARIANCE)
-#define         ITV_L_BLIP_MAX  (ITV_L_BLIP + ITV_VARIANCE)
+#define             ITV_L0_MIN  (ITV_L0 - ITV_VARIANCE)
+#define             ITV_L0_MAX  (ITV_L0 + ITV_VARIANCE)
+#define           ITV_SYNC_MIN  (ITV_SYNC - ITV_VARIANCE)
+#define           ITV_SYNC_MAX  (ITV_SYNC + ITV_VARIANCE)
+#define             ITV_L1_MIN  (ITV_L1 - ITV_VARIANCE)
+#define             ITV_L1_MAX  (ITV_L1 + ITV_VARIANCE)
 #define        ITV_CMD_SEP_MIN  (ITV_CMD_SEP - ITV_VARIANCE)
 
 // parameters for the fixed length protocol decoding

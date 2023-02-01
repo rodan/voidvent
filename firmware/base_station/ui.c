@@ -115,12 +115,15 @@ void parse_user_input(void)
 #endif
     char f = input[0];
 
+    uint8_t family = 11;
+    uint8_t device = 5;
+
     if (f == '?') {
         display_menu();
     } else if (strstr(input, "on")) {
-        it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_ON);
+        it_tx_cmd((family << 4) + device, INTERTECHNO_CMD_ON);
     } else if (strstr(input, "off")) {
-        it_tx_cmd((INTERTECHNO_FAMILY << 4) + INTERTECHNO_DEVICE, INTERTECHNO_CMD_OFF);
+        it_tx_cmd((family << 4) + device, INTERTECHNO_CMD_OFF);
     } else if (strstr(input, "rst")) {
         HWREG8(PMM_BASE + OFS_PMMCTL0_L) |= PMMSWPOR;
     } else {

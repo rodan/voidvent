@@ -16,9 +16,7 @@
 #define UART_TX_USES_IRQ
 
 #define SCH_USES_T1A
-
-#define INTERTECHNO_FAMILY 11
-#define INTERTECHNO_DEVICE 5
+#define SCH_SLOT_CNT 2
 
 //#define USE_SIG
 //#define CONFIG_DEBUG
