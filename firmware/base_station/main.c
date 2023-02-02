@@ -7,6 +7,7 @@
 #include "driverlib.h"
 #include "glue.h"
 #include "intertechno.h"
+#include "hamma_ews.h"
 #include "pwr_mgmt.h"
 #include "rf1a.h"
 #include "radio.h"
@@ -57,6 +58,12 @@ void check_events(void)
         msg |= SYS_MSG_RF_DECODE_RDY;
         it_rst_event();
     }
+    // ews decode ready
+    if (hews_get_event()) {
+        msg |= SYS_MSG_W_DECODE_RDY;
+        hews_rst_event();
+    }
+
 
     eh_exec(msg);
 }
@@ -128,6 +135,7 @@ int main(void)
     eh_register(&scheduler_irq, SYS_MSG_SCHEDULER);
     eh_register(&power_mgmt_sm, SYS_MSG_PWR_SM);
     it_handler_init();
+    hews_handler_init();
     pwr_mgmt_init();
     _BIS_SR(GIE);
 

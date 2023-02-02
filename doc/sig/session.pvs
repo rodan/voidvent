@@ -56,7 +56,7 @@ name=sig4
 color=4285878395
 conv_options=0
 conversion_type=0
-enabled=true
+enabled=false
 name=remote
 
 [view0]
@@ -68,8 +68,8 @@ D4\trace_height=56
 D5\trace_height=56
 D6\trace_height=56
 D7\trace_height=56
-offset=22 serialization::archive 19 0 0 0 0 0 0 0 0 0 0 0 0 0 6
+offset=22 serialization::archive 19 0 0 0 0 100000 0 20816 68171172 16851330 0 -8 1 0 6
 scale=0.001
 segment_display_mode=1
 splitter_state=@ByteArray(\0\0\0\xff\0\0\0\x1\0\0\0\x2\0\0\0X\0\0\x3\xdc\x1\0\0\0\x1\x1\0\0\0\x1\0)
-v_offset=-159
+v_offset=-37

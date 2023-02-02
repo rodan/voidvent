@@ -4,6 +4,7 @@
 #include "proj.h"
 #include "pwr_mgmt.h"
 #include "intertechno.h"
+#include "hamma_ews.h"
 #include "timer0_a.h"
 #include "rf1a.h"
 #include "radio.h"
@@ -43,6 +44,7 @@ void radio_parse_on(void)
 
     timer0_a_init();
     it_rst();
+    hews_rst();
     last_ccr = TA0R;
     RF1AIE |= BIT1;             // Enable the interrupt
 }
@@ -151,6 +153,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
         // so clear it preemptively
         RF1AIFG &= ~BIT1;
         it_decode_any_proto(cur_ccr - last_ccr, pol);
+        hews_decode(cur_ccr - last_ccr, pol);
         last_ccr = cur_ccr;
         break;
     case 6:                     // RFIFG2
@@ -213,6 +216,7 @@ void __attribute__((interrupt(CC1101_VECTOR))) cc1101_isr_handler(void)
             // force decode the last command, 
             // don't count on pol being (RF1AIN & BIT1)
             it_decode_any_proto(cur_ccr - last_ccr, 0);
+            hews_decode(cur_ccr - last_ccr, 0);
 
             // signal lost, stop parsing
             radio_parse_off();

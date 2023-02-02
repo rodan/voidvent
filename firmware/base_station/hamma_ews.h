@@ -37,14 +37,14 @@
 #define        HEWS_EVENT_NULL  0
 #define  HEWS_EVENT_DECODE_RDY  1
 
-#define          HEWS_VARIANCE  10  // 40us
-#define             HEWS_PBLIP  126 // 506us
+#define          HEWS_VARIANCE  30  // 120us
+#define           HEWS_BIT_SEP  126 // 506us
 #define                HEWS_L0  247 // 990us
 #define                HEWS_L1  492 // 1967us
 #define           HEWS_CMD_SEP  992 // 3967us
 
-#define         HEWS_PBLIP_MIN  (HEWS_PBLIP - HEWS_VARIANCE)
-#define         HEWS_PBLIP_MAX  (HEWS_PBLIP + HEWS_VARIANCE)
+#define       HEWS_BIT_SEP_MIN  (HEWS_BIT_SEP - HEWS_VARIANCE)
+#define       HEWS_BIT_SEP_MAX  (HEWS_BIT_SEP + HEWS_VARIANCE)
 #define            HEWS_L0_MIN  (HEWS_L0 - HEWS_VARIANCE)
 #define            HEWS_L0_MAX  (HEWS_L0 + HEWS_VARIANCE)
 #define            HEWS_L1_MIN  (HEWS_L1 - HEWS_VARIANCE)
@@ -55,8 +55,12 @@
 extern "C" {
 #endif
 
+void hews_rst(void);
 void hews_handler_init(void);
 void hews_decode(const uint16_t interval, const uint8_t pol);
+
+uint8_t hews_get_event(void);
+void hews_rst_event(void);
 
 #ifdef __cplusplus
 }
