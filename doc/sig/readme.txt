@@ -51,8 +51,8 @@ itls16_16_1     10010101 10101010 01010110 10011001 01011001 01010101 10010101 1
 after applying a manchester decode on the command and device bytes we get the following:
 
 device 0 - 0x00, 1 - 0x01, 2 - 0x02 ... 15 - 0xf
-'on' command  - 0x0
-'off' command - 0x1
+'on' command  - 0x1
+'off' command - 0x0
 
 device id positions
 0  4  8 12
@@ -84,8 +84,8 @@ e f g h a b c d
 family 11 (decimal)
 device 5  (decimal)
 
-'ON'  is 0111b
-'OFF' is 0110b
+'on'  command - 0111b
+'off' command - 0110b
 
 
 Hama ews trio
@@ -93,7 +93,7 @@ Hama ews trio
 filename         | 
 hama_ews_trio_01   23.5gC 27%rH bat_ok ch2
 
-                                      ch    |temp    |
+                             byte0    byte1    byte2    byte3    byte4 (just the 1st nibble)
 24.8 21             ch1 |  10110011 11000000 11111000 11110001 0101
 23.5gC 27%rH bat_ok ch2 |  10110011 11010000 11101011 11110001 1011
 24.7   21    bat_ok ch2 |  10110011 11010000 11110111 11110001 0101
@@ -102,5 +102,40 @@ hama_ews_trio_01   23.5gC 27%rH bat_ok ch2
 24.9 66             ch3 |  10110011 10100000 11111001 11110100 0010
 24.9 24             ch3 |  10110011 11100000 11111001 11110001 1000
 0.3  53             ch3 |  01011110 00100000 00000011 11110011 0101
+
+byte         |   0   |   1   |   2   |   3   |   4   |   5   |   6   |   7   |
+0            | remote sensor id (generated randomly during sensor poweron)   |
+1            | batt  |   ?   |  channel 0-2  | temperature sign {0x0, 0xf}   |
+2            |            temperature in int Celsius *10                     |
+3            |   1   |   1   |   1   |   1   |         rH% MSB               |
+4            |            rH% LSB            |
+
+Legend:
+
+ - batt is 1 if remote sensor Vcc is above 2.4V, 0 otherwise
+ - channel is either 0, 1 or 2 based on the 3 position switch inside the remote sensor housing
+ - if the second nibble in byte1 == 0x0 then
+        temperature = byte2/10.0
+ - if the second nibble in byte1 == 0xf then 
+        temperature = -1.0 * (0xff - byte2 + 1)/10.0
+
+samples:
+
+temp rH ch bat | 
+22.4 23 2  ok  | cbd0 e0f1 70
+22.4 23 3  ok  | cbe0 e0f1 70
+22.4 25 3  ok  | cba0 e0f1 90
+22.5 23 3  ok  | cbe0 e1f1 70
+22.7 25 3  ok  | cbe0 e3f1 90
+27.3 68 3  low | da61 11f4 40    
+28.6 25 3  ok  | dae1 1ef2 c0
+24.4 20 1  low | da40 f4f1 40  11011010 01000000
+24.7 27 2  low | da50 f7f1 b0  11011010 01010000
+24.4 20 3  low | da60 f4f1 40  11011010 01100000
+23.6 22 3  ok  | dae0 ecf1 60  11011010 11100000
+23.3 20 3  low | da60 e9f1 30
+4.7  48 2  ok  | 2e90 2ff3 00  
+-9.4 64 3  ok  | 58af a2f4 00
+16.6 77 3  ok  | 58a0 a6f4 d0
 
 

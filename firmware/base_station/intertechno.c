@@ -31,13 +31,13 @@ typedef struct {
 } it_result;
 
 typedef struct {
-    uint8_t b[ITV_SIG_SZ];          ///< received message
+    uint8_t b[ITV_SIG_SZ];          ///< received bytes
     uint8_t cnt;                    ///< number of bytes received
     int8_t s;                       ///< shift of current bit in current byte
 } it_variable_proto_decoder;
 
 typedef struct {
-    uint8_t b[ITF_SIG_SZ];          ///< received message
+    uint8_t b[ITF_SIG_SZ];          ///< received bytes
     uint8_t cnt;                    ///< number of bytes received
     int8_t s;                       ///< shift of current bit in current byte
 } it_fixed_proto_decoder;

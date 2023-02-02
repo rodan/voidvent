@@ -9,14 +9,14 @@
 #include "hama_ews.h"
 
 #define  HEWS_SIG_SZ  5
+#define  HEWS_RES_SZ  4
 
 typedef struct {
-    uint8_t dec[HEWS_SIG_SZ];
-    //uint8_t cnt;
+    uint8_t dec[HEWS_RES_SZ];
 } hews_result;
 
 typedef struct {
-    uint8_t b[HEWS_SIG_SZ];     ///< received message
+    uint8_t b[HEWS_SIG_SZ];     ///< received bytes
     uint8_t cnt;        ///< number of bytes received
     int8_t s;           ///< shift of current bit in current byte
 } hews_proto_decoder;
@@ -47,49 +47,50 @@ void hews_rst(void)
 
 void hews_decode(const uint16_t interval, const uint8_t pol)
 {
-    uint8_t i;
-
     if (h.cnt > HEWS_SIG_SZ) {
-        sig3_on;
+        //sig3_on;
         return;
     }
 
     if (pol) {
         if ((interval > HEWS_BIT_SEP_MIN) && (interval < HEWS_BIT_SEP_MAX)) {
             // normal bit separator
-            sig2_on;
+            //sig2_on;
         } else {
-            sig3_on;
+            //sig3_on;
             hews_decoder_rst();
         }
     } else {
         if ((interval > HEWS_L0_MIN) && (interval < HEWS_L0_MAX)) {
             // logic zero
             h.s--;
-            sig2_on;
+            //sig2_on;
         } else if ((interval >  HEWS_L1_MIN) && (interval <  HEWS_L1_MAX)) {
             // logic one
             h.b[h.cnt] |= 1 << h.s;
             h.s--;
-            sig2_on;
+            //sig2_on;
         } else if (interval > HEWS_CMD_SEP_MIN) {
             // command is done. report result only if there are zero inconsistencies
             if ((h.cnt != 4) || (h.s != 3)) {
                 hews_decoder_rst();
-                sig3_on;
+                //sig3_on;
                 return;
             }
-            for (i=0;i<HEWS_SIG_SZ;i++) {
-                h_res.dec[i] = h.b[i];
-            }
+                                    // |   0   |   1   |   2   |   3   |   4   |   5   |   6   |   7   |
+            h_res.dec[0] = h.b[0];  // | remote sensor id (generated randomly during sensor poweron)   |
+            h_res.dec[1] = h.b[1];  // | batt  |   ?   | channel 0-2   |    temp sign {0x00, oxff}     |
+            h_res.dec[2] = h.b[2];  // |            temperature in int Celsius *10                     |
+            h_res.dec[3] = ((h.b[3] & 0xf) << 4 ) | ((h.b[4] & 0xf0) >> 4); // rH%
+
             hews_last_event = HEWS_EVENT_DECODE_RDY;
             hews_decoder_rst();
-            sig3_on;
+            //sig3_on;
         }
     }
 
-    sig2_off;
-    sig3_off;
+    //sig2_off;
+    //sig3_off;
 
     if (h.s < 0) {
         h.s = 7;
@@ -104,8 +105,7 @@ void hews_handler_init(void)
 
 static void hews_decode_irq(uint32_t msg)
 {
-    //print_buf(&hews_res.dec[0], hews_res.cnt);
-    print_buf(&h_res.dec[0], HEWS_SIG_SZ);
+    print_buf(&h_res.dec[0], HEWS_RES_SZ);
     hews_result_rst();
 }
 

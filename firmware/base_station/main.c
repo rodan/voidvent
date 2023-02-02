@@ -7,7 +7,7 @@
 #include "driverlib.h"
 #include "glue.h"
 #include "intertechno.h"
-#include "hamma_ews.h"
+#include "hama_ews.h"
 #include "pwr_mgmt.h"
 #include "rf1a.h"
 #include "radio.h"
