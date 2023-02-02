@@ -6,7 +6,7 @@
 #include "proj.h"
 #include "sig.h"
 #include "ui.h"
-#include "hamma_ews.h"
+#include "hama_ews.h"
 
 #define  HEWS_SIG_SZ  5
 

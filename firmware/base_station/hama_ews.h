@@ -24,15 +24,15 @@
 */
 
 /**
-* \addtogroup Hamma weatherstation trio RF protocol
-* \brief radio protocol for the hamma EWS-Trio
+* \addtogroup Hama weatherstation trio RF protocol
+* \brief radio protocol for the hama EWS-Trio
 * \author Petre Rodan
 * 
 * \{
 **/
 
-#ifndef __HAMMA_EWS_H__
-#define __HAMMA_EWS_H__
+#ifndef __HAMA_EWS_H__
+#define __HAMA_EWS_H__
 
 #define        HEWS_EVENT_NULL  0
 #define  HEWS_EVENT_DECODE_RDY  1
