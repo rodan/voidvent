@@ -75,7 +75,7 @@ LDFLAGS	+= $(LDFLAGS_REL)
 all: mkdir_od config.h driverlib $(EXOUTPUT)
 else
 # Append specific CFLAGS/LDFLAGS
-DEBUG := $(shell grep "^\#define CONFIG_DEBUG" config.h)
+DEBUG := $(shell grep "^#define CONFIG_DEBUG" config.h)
 MACROS := $(shell $(REFLIB_ROOT)/tools/extract_macros.sh -t $(TARGET) -f config.h)
 CFLAGS += $(MACROS)
 ifeq ($(DEBUG),)
