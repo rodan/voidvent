@@ -1,12 +1,12 @@
 
-## mostlyfans
+## voidvent
 
  ////// UNDER DEVELOPMENT ///////////////////////
 
  room climate control project that replaces the microcontroller inside a blueair pro air purifier with a transceiver-enabled cc430f5137 devboard from Olimex.
 
 ```
- source:       https://github.com/rodan/mostlyfans
+ source:       https://github.com/rodan/voidvent
  author:       Petre Rodan <2b4eda@subdimension.ro>
  license:      BSD
 ```
