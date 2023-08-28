@@ -34,9 +34,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 1.0,
-          "height": 1.7,
-          "width": 1.7
+          "drill": 3.2,
+          "height": 3.6,
+          "width": 3.6
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -191,6 +191,7 @@
   },
   "erc": {
     "erc_exclusions": [
+      "pin_to_pin|1524000|469900|cedba38b-5d98-40a6-ad32-fe87fae3121d|2406c10d-da89-4416-8609-23baa76a0fc6|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d",
       "pin_to_pin|1993900|1130300|8e424de7-0747-4db9-b686-7b5c1e02c3c6|fa83fd2a-8456-4823-bc3b-22c0623b02e2|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d",
       "pin_to_pin|1993900|520700|fa83fd2a-8456-4823-bc3b-22c0623b02e2|8e424de7-0747-4db9-b686-7b5c1e02c3c6|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d|/fdd6a173-f1ae-4cc3-bad3-1f09e466a34d"
     ],
