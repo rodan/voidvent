@@ -55,7 +55,10 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        "starved_thermal|159926800|124937400|accfdb77-31ca-4554-bbd1-2f61d73d3c1a|68fbcfc1-1f4d-4a73-ba41-1663d1a224a4|F.Cu",
+        "starved_thermal|159926800|125587400|accfdb77-31ca-4554-bbd1-2f61d73d3c1a|1905aee6-54fe-4b8a-85bb-adcbba350e91|F.Cu"
+      ],
       "meta": {
         "version": 2
       },
@@ -416,7 +419,7 @@
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.25,
+        "clearance": 0.127,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
